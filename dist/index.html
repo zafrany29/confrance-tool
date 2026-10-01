@@ -279,6 +279,19 @@
       </article>
     </template>
 
+    <dialog id="scoreDialog" class="score-dialog">
+      <form method="dialog">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow">ICP score breakdown</p>
+            <h2 id="scoreDialogTitle">Conference score</h2>
+          </div>
+          <button class="icon-button" value="close" aria-label="Close score details">×</button>
+        </div>
+        <div id="scoreDialogBody" class="score-details-body"></div>
+      </form>
+    </dialog>
+
     <script src="app.js"></script>
   </body>
 </html>

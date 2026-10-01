@@ -490,9 +490,7 @@ function renderConferences() {
     template.querySelector(".reason").textContent = conference.reason;
     template.querySelector(".score-bar span").style.width = `${conference.fit.score}%`;
     template.querySelector(".score-details").addEventListener("click", () => {
-      alert(
-        `${conference.name}\n\nICP score: ${conference.fit.score}/100\nTier: ${conference.fit.tier}\n\n${conference.fit.explanation}`,
-      );
+      openScoreDialog(conference);
     });
     template.querySelector(".capture-here").addEventListener("click", () => {
       openView("field");
@@ -505,6 +503,33 @@ function renderConferences() {
   if (!filtered.length) {
     grid.innerHTML = '<p class="insight-item">No conferences match these filters.</p>';
   }
+}
+
+function openScoreDialog(conference) {
+  const dialog = $("#scoreDialog");
+  const fit = scoreConference(conference);
+  $("#scoreDialogTitle").textContent = `${conference.name} · Tier ${fit.tier} · ${fit.score}/100`;
+  $("#scoreDialogBody").innerHTML = `
+    ${scoreMetric("Persona fit", fit.parts.personaFit, 30)}
+    ${scoreMetric("FX relevance", fit.parts.fxRelevance, 25)}
+    ${scoreMetric("Audience quality", fit.parts.audienceQuality, 15)}
+    ${scoreMetric("Travel wedge", fit.parts.travelBonus, 8)}
+    ${scoreMetric("Cluster leverage", fit.parts.clusterBonus, 8)}
+    <p class="score-note">${conference.reason}</p>
+    <p class="score-note">Tier A is 78+, Tier B is 62-77, and Tier C is below 62.</p>
+  `;
+  dialog.showModal();
+}
+
+function scoreMetric(label, value, max) {
+  const percent = Math.round((value / max) * 100);
+  return `
+    <div class="score-metric">
+      <strong>${label}</strong>
+      <span class="score-bar"><span style="width: ${percent}%"></span></span>
+      <span>${Math.round(value)}/${max}</span>
+    </div>
+  `;
 }
 
 function renderPlanner() {
@@ -660,7 +685,12 @@ function scoreConference(event) {
   const explanation =
     `Persona fit ${Math.round(personaFit)}/30, FX relevance ${Math.round(fxRelevance)}/25, ` +
     `audience quality ${Math.round(audienceQuality)}/15, travel wedge ${travelBonus}/8, cluster leverage ${clusterBonus}/8.`;
-  return { score: Math.min(score, 100), tier, explanation };
+  return {
+    score: Math.min(score, 100),
+    tier,
+    explanation,
+    parts: { personaFit, fxRelevance, audienceQuality, travelBonus, clusterBonus },
+  };
 }
 
 function getClusters(includeOwner = true) {
