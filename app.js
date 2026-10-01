@@ -1,6 +1,43 @@
-const storageKeys = {
+﻿const storageKeys = {
   leads: "grainConferenceLeads",
   settings: "grainConferenceSettings",
+};
+
+const DEFAULT_MODEL = "gpt-4.1-mini";
+const SEPARATOR = " - ";
+
+const leadSignals = [
+  "Cross-border payments",
+  "PSP or merchant acquiring",
+  "Travel wholesaler or OTA",
+  "Corporate treasury",
+  "Marketplace or SaaS finance",
+  "Low fit / partner curiosity",
+];
+
+const leadStages = [
+  "Quick booth scan",
+  "Problem confirmed",
+  "Budget or owner identified",
+  "Asked for follow-up",
+  "Existing opportunity",
+];
+
+const signalScores = {
+  "Cross-border payments": 25,
+  "PSP or merchant acquiring": 23,
+  "Travel wholesaler or OTA": 22,
+  "Corporate treasury": 24,
+  "Marketplace or SaaS finance": 16,
+  "Low fit / partner curiosity": 6,
+};
+
+const stageScores = {
+  "Quick booth scan": 5,
+  "Problem confirmed": 16,
+  "Budget or owner identified": 25,
+  "Asked for follow-up": 22,
+  "Existing opportunity": 28,
 };
 
 const conferences = [
@@ -292,11 +329,18 @@ const sampleLeads = [
 let leads = loadJson(storageKeys.leads, sampleLeads);
 let settings = loadJson(storageKeys.settings, {
   openAiKey: "",
-  openAiModel: "gpt-4.1-mini",
+  openAiModel: DEFAULT_MODEL,
   hubspotToken: "",
   webhookUrl: "",
 });
 let activeTags = [];
+let leadListState = {
+  search: "",
+  signal: "all",
+  stage: "all",
+  conferenceId: "all",
+  sort: "newest",
+};
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -304,7 +348,9 @@ const $$ = (selector) => [...document.querySelectorAll(selector)];
 document.addEventListener("DOMContentLoaded", () => {
   initNavigation();
   initFilters();
+  initLeadControls();
   initLeadForm();
+  initScanCapture();
   initSettings();
   initActions();
   renderAll();
@@ -348,14 +394,45 @@ function initFilters() {
   });
 }
 
+function initLeadControls() {
+  fillSelect($("#leadSignalFilter"), leadSignals, "all");
+  fillSelect($("#leadStageFilter"), leadStages, "all");
+  fillSelect(
+    $("#leadConferenceFilter"),
+    conferences.map((conference) => ({ value: conference.id, label: conference.name })),
+    "all",
+  );
+
+  $("#leadSearch").addEventListener("input", (event) => {
+    leadListState.search = event.target.value.trim().toLowerCase();
+    renderLeads();
+  });
+  $("#leadSignalFilter").addEventListener("input", (event) => {
+    leadListState.signal = event.target.value;
+    renderLeads();
+  });
+  $("#leadStageFilter").addEventListener("input", (event) => {
+    leadListState.stage = event.target.value;
+    renderLeads();
+  });
+  $("#leadConferenceFilter").addEventListener("input", (event) => {
+    leadListState.conferenceId = event.target.value;
+    renderLeads();
+  });
+  $("#leadSort").addEventListener("input", (event) => {
+    leadListState.sort = event.target.value;
+    renderLeads();
+  });
+}
+
 function fillSelect(select, options, keepFirstValue = null) {
   const first = keepFirstValue ? select.querySelector(`option[value="${keepFirstValue}"]`) : null;
   select.innerHTML = "";
   if (first) select.append(first);
   options.forEach((option) => {
     const element = document.createElement("option");
-    element.value = option;
-    element.textContent = option;
+    element.value = typeof option === "string" ? option : option.value;
+    element.textContent = typeof option === "string" ? option : option.label;
     select.append(element);
   });
 }
@@ -365,6 +442,8 @@ function initLeadForm() {
     $("#leadConference"),
     conferences.map((conference) => conference.name),
   );
+  fillSelect($("#leadSignal"), leadSignals);
+  fillSelect($("#leadStage"), leadStages);
   $("#leadForm").addEventListener("submit", (event) => {
     event.preventDefault();
     const selectedConference = conferences.find((conference) => conference.name === $("#leadConference").value);
@@ -401,6 +480,21 @@ function initLeadForm() {
   });
 }
 
+function initScanCapture() {
+  $("#scanBadge").addEventListener("click", () => $("#badgeImageInput").click());
+  $("#scanCard").addEventListener("click", () => $("#cardImageInput").click());
+  $("#scanQr").addEventListener("click", () => $("#qrImageInput").click());
+  $("#badgeImageInput").addEventListener("change", (event) => handleLeadImage(event, "badge"));
+  $("#cardImageInput").addEventListener("change", (event) => handleLeadImage(event, "business card"));
+  $("#qrImageInput").addEventListener("change", (event) => handleLeadImage(event, "qr code"));
+  $("#recordConversation").addEventListener("click", () => {
+    setScanStatus(
+      "Conversation recorder is a demo placeholder",
+      "Next version: record audio, transcribe after the meeting, summarize pain, urgency, owner, and next step into the lead notes.",
+    );
+  });
+}
+
 function initSettings() {
   $("#openAiKey").value = settings.openAiKey;
   $("#openAiModel").value = settings.openAiModel;
@@ -413,6 +507,139 @@ function initSettings() {
       saveSettings();
     });
   });
+}
+
+async function handleLeadImage(event, scanType) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const dataUrl = await readFileAsDataUrl(file);
+  $("#scanPreview").src = dataUrl;
+  $("#scanPreview").hidden = false;
+  setScanStatus("Reading image", `Trying to extract lead details from the ${scanType}.`);
+
+  try {
+    const extracted =
+      scanType === "qr code"
+        ? await extractLeadFromQrOrImage(file, dataUrl)
+        : settings.openAiKey
+          ? await extractLeadFromImage(dataUrl, scanType)
+          : demoExtractedLead(scanType);
+    fillLeadForm(extracted);
+    setScanStatus(
+      settings.openAiKey ? "Details extracted" : "Demo details filled",
+      settings.openAiKey
+        ? "Review the fields, add conversation notes, then save the lead."
+        : "No OpenAI key is configured, so this uses demo data to show the intended scan-to-fill flow.",
+    );
+  } catch (error) {
+    setScanStatus(
+      "Extraction failed",
+      `${error.message}. Use manual entry for this lead, or try another image with a clearer badge/card.`,
+    );
+  } finally {
+    event.target.value = "";
+  }
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener("load", () => resolve(reader.result));
+    reader.addEventListener("error", () => reject(new Error("Could not read the selected image")));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function extractLeadFromImage(dataUrl, scanType) {
+  const response = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${settings.openAiKey}`,
+    },
+    body: JSON.stringify({
+      model: settings.openAiModel || DEFAULT_MODEL,
+      input: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_text",
+              text:
+                `Extract lead details from this conference ${scanType}. Return only JSON with these keys: ` +
+                "name, company, email, title, signal, notes. " +
+                `Use one signal from: ${leadSignals.join(", ")}. ` +
+                "If a field is missing, return an empty string. Keep notes short and factual.",
+            },
+            { type: "input_image", image_url: dataUrl },
+          ],
+        },
+      ],
+      max_output_tokens: 350,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`OpenAI returned ${response.status}`);
+  }
+
+  const data = await response.json();
+  const text = data.output_text || "";
+  const jsonText = text.match(/\{[\s\S]*\}/)?.[0] || text;
+  try {
+    return JSON.parse(jsonText);
+  } catch {
+    throw new Error("The extraction response was not valid JSON");
+  }
+}
+
+function demoExtractedLead(scanType) {
+  if (scanType === "badge") {
+    return {
+      name: "Daniel Park",
+      company: "NomadPay",
+      email: "daniel.park@nomadpay.example",
+      title: "Head of Cross-Border Payments",
+      signal: "Cross-border payments",
+      notes: "Captured from demo conference badge. Confirm FX exposure and payment volume before follow-up.",
+    };
+  }
+  if (scanType === "qr code") {
+    return {
+      name: "Ari Levin",
+      company: "BridgeRoute Payments",
+      email: "ari.levin@bridgeroute.example",
+      title: "VP Treasury Operations",
+      signal: "Cross-border payments",
+      notes: "Captured from demo QR code. Ask about treasury owner, settlement currencies, and hedge workflow.",
+    };
+  }
+  return {
+    name: "Elena Rossi",
+    company: "VistaBeds Wholesale",
+    email: "elena.rossi@vistabeds.example",
+    title: "Finance Director",
+    signal: "Travel wholesaler or OTA",
+    notes: "Captured from demo business card. Ask about supplier currency exposure and margin leakage.",
+  };
+}
+
+function fillLeadForm(lead) {
+  if (lead.name) $("#leadName").value = lead.name;
+  if (lead.company) $("#leadCompany").value = lead.company;
+  if (lead.email) $("#leadEmail").value = lead.email;
+  if (lead.title) $("#leadTitle").value = lead.title;
+  if (lead.signal) $("#leadSignal").value = lead.signal;
+  if (lead.notes) {
+    $("#leadNotes").value = $("#leadNotes").value
+      ? `${$("#leadNotes").value}\n${lead.notes}`
+      : lead.notes;
+  }
+}
+
+function setScanStatus(title, body) {
+  $("#scanStatus").innerHTML = `<strong>${title}</strong><p>${body}</p>`;
 }
 
 function initActions() {
@@ -481,12 +708,12 @@ function renderConferences() {
   filtered.forEach((conference) => {
     const template = $("#conferenceCardTemplate").content.cloneNode(true);
     const badge = template.querySelector(".tier-badge");
-    badge.textContent = `Tier ${conference.fit.tier} · ${conference.fit.score}`;
+    badge.textContent = `Tier ${conference.fit.tier}${SEPARATOR}${conference.fit.score}`;
     badge.classList.add(`tier-${conference.fit.tier.toLowerCase()}`);
     template.querySelector(".date-pill").textContent = formatDateRange(conference);
     template.querySelector("h3").textContent = conference.name;
     template.querySelector(".meta").textContent =
-      `${conference.city}, ${conference.country} · ${conference.vertical} · ~${formatNumber(conference.audience)} attendees`;
+      `${conference.city}, ${conference.country}${SEPARATOR}${conference.vertical}${SEPARATOR}~${formatNumber(conference.audience)} attendees`;
     template.querySelector(".reason").textContent = conference.reason;
     template.querySelector(".score-bar span").style.width = `${conference.fit.score}%`;
     template.querySelector(".score-details").addEventListener("click", () => {
@@ -508,7 +735,7 @@ function renderConferences() {
 function openScoreDialog(conference) {
   const dialog = $("#scoreDialog");
   const fit = scoreConference(conference);
-  $("#scoreDialogTitle").textContent = `${conference.name} · Tier ${fit.tier} · ${fit.score}/100`;
+  $("#scoreDialogTitle").textContent = `${conference.name}${SEPARATOR}Tier ${fit.tier}${SEPARATOR}${fit.score}/100`;
   $("#scoreDialogBody").innerHTML = `
     ${scoreMetric("Persona fit", fit.parts.personaFit, 30)}
     ${scoreMetric("FX relevance", fit.parts.fxRelevance, 25)}
@@ -558,7 +785,7 @@ function renderPlanner() {
   renderInsightList(
     $("#clusterList"),
     getClusters().map((cluster) => ({
-      title: `${cluster.region} · ${cluster.label}`,
+      title: `${cluster.region}${SEPARATOR}${cluster.label}`,
       body: `${cluster.events.map((event) => event.name).join(", ")}. Suggested owner: ${cluster.owner}.`,
     })),
   );
@@ -587,17 +814,169 @@ function renderPlanner() {
 }
 
 function renderLeads() {
-  renderInsightList(
-    $("#leadFeed"),
-    leads.slice(0, 8).map((lead) => {
-      const conference = getConference(lead.conferenceId);
-      return {
-        title: `${lead.name} · ${lead.company}`,
-        body: `${conference.name} · ${lead.stage} · ${lead.signal}${lead.tags.length ? ` · ${lead.tags.join(", ")}` : ""}`,
-      };
-    }),
-    "No leads captured yet.",
+  const feed = $("#leadFeed");
+  const visibleLeads = getVisibleLeads();
+  feed.innerHTML = "";
+
+  if (!visibleLeads.length) {
+    feed.innerHTML = '<p class="insight-item">No leads match these filters.</p>';
+    return;
+  }
+
+  visibleLeads.forEach((lead) => {
+    const conference = getConference(lead.conferenceId);
+    const relationshipCount = getRelationshipCount(lead);
+    const card = document.createElement("article");
+    const header = document.createElement("header");
+    const identity = document.createElement("div");
+    const name = document.createElement("h4");
+    const company = document.createElement("p");
+    const score = document.createElement("span");
+    const meta = document.createElement("div");
+    const notes = document.createElement("p");
+
+    card.className = "lead-card";
+    score.className = "lead-score";
+    meta.className = "lead-meta";
+    name.textContent = lead.name;
+    company.textContent = `${lead.company}${lead.title ? `${SEPARATOR}${lead.title}` : ""}`;
+    score.textContent = leadQualityScore(lead);
+    notes.textContent = lead.notes || "No notes captured yet.";
+
+    identity.append(name, company);
+    header.append(identity, score);
+    [conference.name, lead.stage, lead.signal, `${relationshipCount} touch${relationshipCount === 1 ? "" : "es"}`].forEach(
+      (label) => meta.append(createTag(label)),
+    );
+    card.append(header, meta, notes);
+    feed.append(card);
+  });
+}
+
+async function extractLeadFromQrOrImage(file, dataUrl) {
+  const qrValue = await decodeQrImage(file);
+  if (qrValue) {
+    return parseQrLead(qrValue);
+  }
+  return settings.openAiKey ? extractLeadFromImage(dataUrl, "qr code") : demoExtractedLead("qr code");
+}
+
+async function decodeQrImage(file) {
+  if (!("BarcodeDetector" in window)) return "";
+  const detector = new BarcodeDetector({ formats: ["qr_code"] });
+  const bitmap = await createImageBitmap(file);
+  try {
+    const codes = await detector.detect(bitmap);
+    return codes[0]?.rawValue || "";
+  } finally {
+    bitmap.close?.();
+  }
+}
+
+function parseQrLead(value) {
+  const trimmed = value.trim();
+  if (!trimmed) throw new Error("QR code was empty");
+
+  if (trimmed.startsWith("{")) {
+    return JSON.parse(trimmed);
+  }
+  if (/^BEGIN:VCARD/i.test(trimmed)) {
+    return parseVCard(trimmed);
+  }
+  if (/^MECARD:/i.test(trimmed)) {
+    return parseMeCard(trimmed);
+  }
+
+  try {
+    const url = new URL(trimmed);
+    const params = url.searchParams;
+    return {
+      name: params.get("name") || params.get("fullName") || "",
+      company: params.get("company") || params.get("org") || "",
+      email: params.get("email") || "",
+      title: params.get("title") || "",
+      signal: params.get("signal") || "Cross-border payments",
+      notes: params.get("notes") || `QR source: ${url.hostname}`,
+    };
+  } catch {
+    throw new Error("QR code did not contain a recognized lead format");
+  }
+}
+
+function parseVCard(value) {
+  const field = (name) => {
+    const line = value.split(/\r?\n/).find((item) => item.toUpperCase().startsWith(`${name}:`));
+    return line ? line.slice(line.indexOf(":") + 1).trim() : "";
+  };
+  return {
+    name: field("FN") || field("N").replaceAll(";", " ").trim(),
+    company: field("ORG"),
+    email: field("EMAIL"),
+    title: field("TITLE"),
+    signal: "Cross-border payments",
+    notes: "Captured from QR vCard.",
+  };
+}
+
+function parseMeCard(value) {
+  const body = value.replace(/^MECARD:/i, "").replace(/;$/, "");
+  const parts = Object.fromEntries(
+    body
+      .split(";")
+      .map((part) => part.split(":"))
+      .filter(([key, val]) => key && val)
+      .map(([key, ...rest]) => [key.toUpperCase(), rest.join(":")]),
   );
+  return {
+    name: (parts.N || "").replace(",", " ").trim(),
+    company: parts.ORG || "",
+    email: parts.EMAIL || "",
+    title: parts.TITLE || "",
+    signal: "Cross-border payments",
+    notes: "Captured from QR meCard.",
+  };
+}
+
+function getVisibleLeads() {
+  return leads
+    .filter((lead) => {
+      const conference = getConference(lead.conferenceId);
+      const searchable = [
+        lead.name,
+        lead.company,
+        lead.email,
+        lead.title,
+        lead.signal,
+        lead.stage,
+        lead.notes,
+        lead.tags.join(" "),
+        conference.name,
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return (
+        searchable.includes(leadListState.search) &&
+        (leadListState.signal === "all" || lead.signal === leadListState.signal) &&
+        (leadListState.stage === "all" || lead.stage === leadListState.stage) &&
+        (leadListState.conferenceId === "all" || lead.conferenceId === leadListState.conferenceId)
+      );
+    })
+    .sort(compareLeads);
+}
+
+function compareLeads(a, b) {
+  const sorters = {
+    newest: () => dateValue(b.createdAt) - dateValue(a.createdAt),
+    oldest: () => dateValue(a.createdAt) - dateValue(b.createdAt),
+    quality: () => leadQualityScore(b) - leadQualityScore(a),
+    relationship: () => getRelationshipCount(b) - getRelationshipCount(a),
+    conference: () => scoreConference(getConference(b.conferenceId)).score - scoreConference(getConference(a.conferenceId)).score,
+    stage: () => (stageScores[b.stage] || 0) - (stageScores[a.stage] || 0),
+    company: () => a.company.localeCompare(b.company),
+  };
+  const primary = (sorters[leadListState.sort] || sorters.newest)();
+  return primary || dateValue(b.createdAt) - dateValue(a.createdAt);
 }
 
 function renderRelationships() {
@@ -621,7 +1000,7 @@ function renderRelationships() {
       <header>
         <div>
           <h3>${last.name}</h3>
-          <p class="meta">${last.company} · ${conferencesMet.length} conferences · ${sorted.length} conversations</p>
+          <p class="meta">${last.company}${SEPARATOR}${conferencesMet.length} conferences${SEPARATOR}${sorted.length} conversations</p>
         </div>
         <span class="tag ${signal.kind === "warming" ? "signal-warm" : "signal-watch"}">${signal.label}</span>
       </header>
@@ -641,10 +1020,7 @@ function renderRelationships() {
 }
 
 function renderLeadSelectors() {
-  const options = leads.map((lead) => {
-    const conference = getConference(lead.conferenceId);
-    return `${lead.name} · ${lead.company} · ${conference.name}`;
-  });
+  const options = leads.map((lead) => ({ value: lead.id, label: leadLabel(lead) }));
   fillSelect($("#aiLeadSelect"), options);
   fillSelect($("#hubspotLeadSelect"), options);
 }
@@ -672,6 +1048,13 @@ function renderInsightList(container, items, emptyText = "No items yet.") {
     div.innerHTML = `<strong>${item.title}</strong><p>${item.body}</p>`;
     container.append(div);
   });
+}
+
+function createTag(label) {
+  const tag = document.createElement("span");
+  tag.className = "tag";
+  tag.textContent = label;
+  return tag;
 }
 
 function scoreConference(event) {
@@ -725,10 +1108,14 @@ function recommendOwner(events) {
 function getRelationshipGroups() {
   const groups = [];
   leads.forEach((lead) => {
-    const existing = groups.find((group) => isSameContact(group.leads[0], lead).same);
-    if (existing) {
+    let matchResult = null;
+    const existing = groups.find((group) => {
+      matchResult = isSameContact(group.leads[0], lead);
+      return matchResult.same;
+    });
+    if (existing && matchResult) {
       existing.leads.push(lead);
-      existing.matchReason = isSameContact(existing.leads[0], lead).reason;
+      existing.matchReason = matchResult.reason;
     } else {
       groups.push({ leads: [lead], matchReason: "initial record" });
     }
@@ -797,7 +1184,7 @@ async function generateAiCoachNote() {
         Authorization: `Bearer ${settings.openAiKey}`,
       },
       body: JSON.stringify({
-        model: settings.openAiModel || "gpt-4.1-mini",
+        model: settings.openAiModel || DEFAULT_MODEL,
         input: prompt,
         max_output_tokens: 450,
       }),
@@ -880,21 +1267,8 @@ Grain team`;
 function leadQualityScore(lead) {
   const conference = getConference(lead.conferenceId);
   const base = scoreConference(conference).score * 0.45;
-  const signalScore = {
-    "Cross-border payments": 25,
-    "PSP or merchant acquiring": 23,
-    "Travel wholesaler or OTA": 22,
-    "Corporate treasury": 24,
-    "Marketplace or SaaS finance": 16,
-    "Low fit / partner curiosity": 6,
-  }[lead.signal];
-  const stageScore = {
-    "Quick booth scan": 5,
-    "Problem confirmed": 16,
-    "Budget or owner identified": 25,
-    "Asked for follow-up": 22,
-    "Existing opportunity": 28,
-  }[lead.stage];
+  const signalScore = signalScores[lead.signal] || 0;
+  const stageScore = stageScores[lead.stage] || 0;
   return Math.min(100, Math.round(base + signalScore + stageScore));
 }
 
@@ -992,12 +1366,25 @@ function exportCsv() {
 }
 
 function getSelectedLead(selector) {
-  const label = $(selector).value;
-  return leads.find((lead) => `${lead.name} · ${lead.company} · ${getConference(lead.conferenceId).name}` === label);
+  const id = $(selector).value;
+  return leads.find((lead) => lead.id === id);
 }
 
 function getConference(id) {
   return conferences.find((conference) => conference.id === id);
+}
+
+function leadLabel(lead) {
+  return [lead.name, lead.company, getConference(lead.conferenceId).name].join(SEPARATOR);
+}
+
+function getRelationshipCount(lead) {
+  const group = getRelationshipGroups().find((item) => item.leads.some((groupLead) => groupLead.id === lead.id));
+  return group?.leads.length || 1;
+}
+
+function dateValue(value) {
+  return new Date(value).getTime() || 0;
 }
 
 function openView(id) {

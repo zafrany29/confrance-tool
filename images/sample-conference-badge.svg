@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1100" viewBox="0 0 800 1100">
+  <rect width="800" height="1100" rx="42" fill="#f7f8f4"/>
+  <rect x="0" y="0" width="800" height="190" rx="42" fill="#0c3f42"/>
+  <text x="52" y="82" font-family="Inter, Arial, sans-serif" font-size="42" font-weight="900" fill="#a9e6c5">Money20/20 USA</text>
+  <text x="52" y="136" font-family="Inter, Arial, sans-serif" font-size="28" fill="#ffffff">Las Vegas | Payments and fintech</text>
+  <rect x="52" y="246" width="696" height="560" rx="26" fill="#ffffff" stroke="#d8e2de" stroke-width="3"/>
+  <text x="400" y="382" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="62" font-weight="900" fill="#122322">Daniel Park</text>
+  <text x="400" y="452" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="34" fill="#61706e">Head of Cross-Border Payments</text>
+  <text x="400" y="536" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="44" font-weight="800" fill="#0f5b5f">NomadPay</text>
+  <text x="400" y="610" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="28" fill="#122322">daniel.park@nomadpay.example</text>
+  <rect x="180" y="684" width="440" height="62" rx="31" fill="#f0b95b"/>
+  <text x="400" y="725" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="27" font-weight="800" fill="#122322">PSP | FX exposure</text>
+  <text x="52" y="914" font-family="Inter, Arial, sans-serif" font-size="26" fill="#61706e">Booth note: settlement in 8 currencies</text>
+  <rect x="52" y="958" width="696" height="68" rx="12" fill="#0c3f42"/>
+  <text x="400" y="1002" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="26" font-weight="800" fill="#ffffff">SCAN OR SNAP TO CAPTURE</text>
+</svg>

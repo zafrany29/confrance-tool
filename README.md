@@ -6,7 +6,8 @@ A lightweight conference prioritization and field-capture tool for Grain's sales
 
 - Ranks fintech, payments, treasury, travel, and SaaS conferences by ICP fit.
 - Shows planning coverage by month, geography, and trip clusters.
-- Lets a salesperson capture leads quickly from a phone or laptop.
+- Lets a salesperson capture leads quickly from a phone or laptop using badge, business card, or QR image capture first, with manual entry as backup.
+- Displays captured leads with search, signal/stage/conference filters, and sorting by recency, lead quality, relationship strength, conference fit, stage, or company.
 - Detects repeat contacts across conferences using email, name similarity, company similarity, and domain signals.
 - Generates an AI-assisted follow-up coach note with a configurable OpenAI API key, with a transparent local fallback for demos.
 - Provides a HubSpot handoff path through a configurable private app token, webhook URL, or CSV export.
@@ -24,6 +25,15 @@ For a syntax check:
 ```bash
 npm run check
 ```
+
+## Phone test assets
+
+The `images/` folder contains sample assets for testing capture on a phone:
+
+- `sample-conference-badge.svg`
+- `sample-business-card.svg`
+- `sample-lead-qr.svg`
+- `sample-lead-qr-payload.txt`
 
 ## Updating the conference data
 
@@ -57,6 +67,8 @@ Tiers:
 ## AI and integrations
 
 API keys are not hardcoded. They are entered in the browser and stored in local storage for the demo. For production, the same payloads should go through a small serverless proxy so private tokens are never exposed in a browser.
+
+The badge/card/QR capture flow uses local QR decoding when supported by the browser and the configured OpenAI key when image understanding is needed. Without a key, it fills demo data so reviewers can still see the intended scan-to-fill workflow. The conversation recording button is intentionally a non-working demo placeholder for a future audio transcription workflow.
 
 HubSpot push supports:
 

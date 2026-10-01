@@ -32,14 +32,16 @@ Show:
 
 ## 4. Show field capture
 
-"On the show floor, speed matters more than completeness. The lead form asks for only what a rep can realistically capture in a noisy conversation: person, company, signal, stage, notes, and a few quick tags."
+"On the show floor, speed matters more than completeness, so the primary path is now scan-first. A rep can scan a conference badge, business card, or QR code and let the app prefill the form. Manual entry stays as the backup for blurry images, blocked camera access, or incomplete badges."
 
 Demo:
 
-- Select a conference.
-- Add a realistic lead.
+- Click scan badge, scan card, or scan QR.
+- Explain that live extraction uses the configured OpenAI key, while the demo fallback fills sample data when no key is present.
+- Select a conference if needed.
 - Use quick tags like `FX exposure` and `Follow up today`.
 - Save the lead.
+- Point out the disabled conversation recording button as a future path: record the conversation, transcribe later, and summarize the pain, owner, urgency, and next step into the lead notes.
 
 ## 5. Explain cross-conference intelligence
 

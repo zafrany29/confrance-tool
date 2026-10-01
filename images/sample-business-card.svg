@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1050" height="600" viewBox="0 0 1050 600">
+  <rect width="1050" height="600" rx="34" fill="#0c3f42"/>
+  <rect x="36" y="36" width="978" height="528" rx="26" fill="#f7f8f4"/>
+  <path d="M72 470c190-24 218-266 410-266 46 0 88 13 124 38-115 16-187 89-260 184-56 72-143 127-274 142v-98Z" fill="#a9e6c5" opacity="0.9"/>
+  <text x="86" y="130" font-family="Inter, Arial, sans-serif" font-size="42" font-weight="800" fill="#0c3f42">Elena Rossi</text>
+  <text x="86" y="178" font-family="Inter, Arial, sans-serif" font-size="28" fill="#61706e">Finance Director</text>
+  <text x="86" y="256" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="700" fill="#122322">VistaBeds Wholesale</text>
+  <text x="86" y="330" font-family="Inter, Arial, sans-serif" font-size="26" fill="#122322">elena.rossi@vistabeds.example</text>
+  <text x="86" y="374" font-family="Inter, Arial, sans-serif" font-size="26" fill="#122322">+44 20 5555 0148</text>
+  <text x="86" y="470" font-family="Inter, Arial, sans-serif" font-size="24" fill="#0f5b5f">Travel wholesaler | EUR/GBP supplier exposure</text>
+  <rect x="776" y="86" width="150" height="150" rx="20" fill="#0f5b5f"/>
+  <text x="851" y="178" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="56" font-weight="900" fill="#f5c16c">VB</text>
+</svg>

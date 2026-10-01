@@ -117,10 +117,38 @@
           <form id="leadForm" class="lead-form">
             <div class="section-head compact">
               <div>
-                <h2>Fast lead capture</h2>
-                <p>Optimized for a noisy booth conversation. Log just enough to follow up well.</p>
+                <h2>Manual lead capture</h2>
+                <p>Scan first when the rep is moving fast. Manual entry stays available when the camera or extraction fails.</p>
               </div>
             </div>
+            <section class="scan-panel" aria-label="Photo-first capture">
+              <div class="scan-actions">
+                <button id="scanBadge" class="scan-button" type="button">
+                  <span>▣</span>
+                  Scan badge
+                </button>
+                <button id="scanCard" class="scan-button" type="button">
+                  <span>▤</span>
+                  Scan card
+                </button>
+                <button id="scanQr" class="scan-button" type="button">
+                  <span>⌗</span>
+                  Scan QR
+                </button>
+                <button id="recordConversation" class="scan-button disabled" type="button" aria-disabled="true">
+                  <span>●</span>
+                  Record conversation
+                </button>
+              </div>
+              <input id="badgeImageInput" class="hidden-input" type="file" accept="image/*" capture="environment" />
+              <input id="cardImageInput" class="hidden-input" type="file" accept="image/*" capture="environment" />
+              <input id="qrImageInput" class="hidden-input" type="file" accept="image/*" capture="environment" />
+              <div id="scanStatus" class="scan-status">
+                <strong>Ready to capture</strong>
+                <p>Badge/card/QR extraction uses the configured OpenAI key when needed. Without a key, the app fills demo data so the flow is visible.</p>
+              </div>
+              <img id="scanPreview" class="scan-preview" alt="Captured badge or business card preview" hidden />
+            </section>
             <label>
               Conference
               <select id="leadConference" required></select>
@@ -181,7 +209,45 @@
           </form>
 
           <aside class="capture-feed">
-            <h3>Today’s captured leads</h3>
+            <h3>Captured leads</h3>
+            <div class="lead-controls" aria-label="Lead list controls">
+              <label>
+                Find lead
+                <input id="leadSearch" type="search" placeholder="Name, company, notes..." />
+              </label>
+              <div class="two-col">
+                <label>
+                  Signal
+                  <select id="leadSignalFilter">
+                    <option value="all">All signals</option>
+                  </select>
+                </label>
+                <label>
+                  Stage
+                  <select id="leadStageFilter">
+                    <option value="all">All stages</option>
+                  </select>
+                </label>
+              </div>
+              <label>
+                Conference
+                <select id="leadConferenceFilter">
+                  <option value="all">All conferences</option>
+                </select>
+              </label>
+              <label>
+                Sort by
+                <select id="leadSort">
+                  <option value="newest">Newest first</option>
+                  <option value="quality">Lead quality</option>
+                  <option value="relationship">Relationship strength</option>
+                  <option value="conference">Conference ICP score</option>
+                  <option value="stage">Conversation stage</option>
+                  <option value="company">Company A-Z</option>
+                  <option value="oldest">Oldest first</option>
+                </select>
+              </label>
+            </div>
             <div id="leadFeed" class="stack"></div>
           </aside>
         </div>
