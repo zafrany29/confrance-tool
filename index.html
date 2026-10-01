@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grain Conference Intelligence</title>
+    <meta
+      name="description"
+      content="Conference prioritization, field lead capture, relationship tracking, and HubSpot handoff for Grain's sales team."
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230c2d2e'/%3E%3Cpath d='M14 42c13-2 15-20 29-20 3 0 6 1 8 3-8 1-13 6-18 13-4 5-10 9-19 10v-6Z' fill='%23a9e6c5'/%3E%3Cpath d='M16 26h32v5H16z' fill='%23f5c16c'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Grain sales workspace</p>
+        <h1>Conference Intelligence</h1>
+      </div>
+      <nav class="nav-tabs" aria-label="Main views">
+        <button class="tab active" data-view="conferences">Conferences</button>
+        <button class="tab" data-view="planner">Planner</button>
+        <button class="tab" data-view="field">Field capture</button>
+        <button class="tab" data-view="relationships">Relationships</button>
+        <button class="tab" data-view="integrations">HubSpot & AI</button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="scoreboard" aria-label="Sales priorities">
+        <article>
+          <span id="tierA">0</span>
+          <p>Tier A conferences</p>
+        </article>
+        <article>
+          <span id="tripClusters">0</span>
+          <p>trip clusters</p>
+        </article>
+        <article>
+          <span id="relationshipSignals">0</span>
+          <p>relationship signals</p>
+        </article>
+        <article>
+          <span id="capturedLeads">0</span>
+          <p>captured leads</p>
+        </article>
+      </section>
+
+      <section id="conferences" class="view active">
+        <div class="section-head">
+          <div>
+            <h2>Prioritize the right rooms</h2>
+            <p>Score favors payments, fintech, treasury, travel wholesalers, FX exposure, buyer seniority, and deal density.</p>
+          </div>
+          <button id="resetData" class="ghost-button">Reset sample data</button>
+        </div>
+
+        <div class="filters" aria-label="Conference filters">
+          <label>
+            Search
+            <input id="searchInput" type="search" placeholder="Money20/20, treasury, Dubai..." />
+          </label>
+          <label>
+            Vertical
+            <select id="verticalFilter">
+              <option value="all">All verticals</option>
+            </select>
+          </label>
+          <label>
+            Region
+            <select id="regionFilter">
+              <option value="all">All regions</option>
+            </select>
+          </label>
+          <label>
+            Minimum tier
+            <select id="tierFilter">
+              <option value="all">All tiers</option>
+              <option value="A">A only</option>
+              <option value="B">A or B</option>
+            </select>
+          </label>
+        </div>
+
+        <div id="conferenceGrid" class="conference-grid"></div>
+      </section>
+
+      <section id="planner" class="view">
+        <div class="section-head">
+          <div>
+            <h2>Coverage plan</h2>
+            <p>See month-by-month investment, geography clusters, and missed ICP pockets.</p>
+          </div>
+        </div>
+        <div class="planner-layout">
+          <div>
+            <h3>Calendar density</h3>
+            <div id="monthTimeline" class="timeline"></div>
+          </div>
+          <div>
+            <h3>Trip clusters</h3>
+            <div id="clusterList" class="stack"></div>
+          </div>
+          <div>
+            <h3>Coverage gaps</h3>
+            <div id="gapList" class="stack"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="field" class="view">
+        <div class="field-layout">
+          <form id="leadForm" class="lead-form">
+            <div class="section-head compact">
+              <div>
+                <h2>Fast lead capture</h2>
+                <p>Optimized for a noisy booth conversation. Log just enough to follow up well.</p>
+              </div>
+            </div>
+            <label>
+              Conference
+              <select id="leadConference" required></select>
+            </label>
+            <div class="two-col">
+              <label>
+                Name
+                <input id="leadName" required autocomplete="name" placeholder="Maya Cohen" />
+              </label>
+              <label>
+                Company
+                <input id="leadCompany" required autocomplete="organization" placeholder="AtlasPay" />
+              </label>
+            </div>
+            <div class="two-col">
+              <label>
+                Email
+                <input id="leadEmail" type="email" autocomplete="email" placeholder="maya@atlaspay.com" />
+              </label>
+              <label>
+                Title
+                <input id="leadTitle" autocomplete="organization-title" placeholder="VP Payments" />
+              </label>
+            </div>
+            <label>
+              ICP signal
+              <select id="leadSignal">
+                <option>Cross-border payments</option>
+                <option>PSP or merchant acquiring</option>
+                <option>Travel wholesaler or OTA</option>
+                <option>Corporate treasury</option>
+                <option>Marketplace or SaaS finance</option>
+                <option>Low fit / partner curiosity</option>
+              </select>
+            </label>
+            <label>
+              Conversation stage
+              <select id="leadStage">
+                <option>Quick booth scan</option>
+                <option>Problem confirmed</option>
+                <option>Budget or owner identified</option>
+                <option>Asked for follow-up</option>
+                <option>Existing opportunity</option>
+              </select>
+            </label>
+            <label>
+              Notes
+              <textarea id="leadNotes" rows="4" placeholder="Uses 6 currencies; pain around margin leakage on EUR/GBP. Wants CFO intro after quarter close."></textarea>
+            </label>
+            <div class="quick-tags" aria-label="Lead tags">
+              <button type="button" data-tag="FX exposure">FX exposure</button>
+              <button type="button" data-tag="Payments volume">Payments volume</button>
+              <button type="button" data-tag="Travel flow">Travel flow</button>
+              <button type="button" data-tag="CFO owner">CFO owner</button>
+              <button type="button" data-tag="Follow up today">Follow up today</button>
+            </div>
+            <button class="primary-button" type="submit">Save lead</button>
+          </form>
+
+          <aside class="capture-feed">
+            <h3>Today’s captured leads</h3>
+            <div id="leadFeed" class="stack"></div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="relationships" class="view">
+        <div class="section-head">
+          <div>
+            <h2>Cross-conference intelligence</h2>
+            <p>Fuzzy matching looks at email, name variants, company domain, title changes, and repeated intent.</p>
+          </div>
+        </div>
+        <div id="relationshipList" class="relationship-grid"></div>
+      </section>
+
+      <section id="integrations" class="view">
+        <div class="integration-layout">
+          <article class="panel">
+            <h2>AI follow-up coach</h2>
+            <p>
+              Uses the selected lead, conference context, and relationship history to draft a short follow-up and next-step judgment.
+              Add an OpenAI API key to run live AI, or use the transparent local fallback for demos.
+            </p>
+            <div class="settings-grid">
+              <label>
+                OpenAI API key
+                <input id="openAiKey" type="password" placeholder="sk-..." autocomplete="off" />
+              </label>
+              <label>
+                Model
+                <input id="openAiModel" value="gpt-4.1-mini" />
+              </label>
+            </div>
+            <label>
+              Pick lead
+              <select id="aiLeadSelect"></select>
+            </label>
+            <div class="button-row">
+              <button id="runAi" class="primary-button" type="button">Generate coach note</button>
+              <button id="copyAiPrompt" class="ghost-button" type="button">Copy prompt</button>
+            </div>
+            <pre id="aiOutput" class="output-box">Select a lead and generate a coaching note.</pre>
+          </article>
+
+          <article class="panel">
+            <h2>HubSpot handoff</h2>
+            <p>
+              Configure either a HubSpot private app token for direct contact creation or a webhook URL for Zapier, Make, or a tiny serverless proxy.
+              Export remains available when the show floor connection is poor.
+            </p>
+            <div class="settings-grid">
+              <label>
+                HubSpot private app token
+                <input id="hubspotToken" type="password" placeholder="pat-na1-..." autocomplete="off" />
+              </label>
+              <label>
+                Webhook URL
+                <input id="webhookUrl" type="url" placeholder="https://hooks.zapier.com/..." />
+              </label>
+            </div>
+            <label>
+              Pick lead
+              <select id="hubspotLeadSelect"></select>
+            </label>
+            <div class="button-row">
+              <button id="pushHubspot" class="primary-button" type="button">Push selected lead</button>
+              <button id="exportCsv" class="ghost-button" type="button">Export CSV</button>
+            </div>
+            <pre id="hubspotOutput" class="output-box">HubSpot payloads include contact properties, event name, ICP score, and notes.</pre>
+          </article>
+
+          <article class="panel sources">
+            <h2>Sample data sources</h2>
+            <p>The dataset is intentionally small and editable. Dates and audience sizes should be refreshed before a real buying decision.</p>
+            <ul id="sourceList"></ul>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <template id="conferenceCardTemplate">
+      <article class="conference-card">
+        <div class="card-top">
+          <span class="tier-badge"></span>
+          <span class="date-pill"></span>
+        </div>
+        <h3></h3>
+        <p class="meta"></p>
+        <p class="reason"></p>
+        <div class="score-bar"><span></span></div>
+        <div class="card-actions">
+          <button class="ghost-button small score-details" type="button">Score details</button>
+          <button class="primary-button small capture-here" type="button">Capture lead</button>
+        </div>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>

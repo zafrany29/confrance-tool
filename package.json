@@ -1,0 +1,11 @@
+{
+  "name": "grain_task",
+  "version": "1.0.0",
+  "description": "Conference intelligence tool for Grain's sales team.",
+  "main": "app.js",
+  "scripts": {
+    "start": "npx serve .",
+    "check": "node --check app.js"
+  },
+  "private": true
+}
