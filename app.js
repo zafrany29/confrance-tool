@@ -7,6 +7,7 @@ const DEFAULT_MODEL = "gpt-4.1-mini";
 const SEPARATOR = " - ";
 const CONFERENCES_PER_PAGE = 9;
 const CLUSTERS_PER_PAGE = 3;
+const LEADS_PER_PAGE = 4;
 
 const leadSignals = [
   "Cross-border payments",
@@ -693,11 +694,21 @@ let leadListState = {
 };
 let conferencePage = 1;
 let clusterPage = 1;
+let leadPage = 1;
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
+
+window.addEventListener("pageshow", () => {
+  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+});
+
 document.addEventListener("DOMContentLoaded", async () => {
+  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   await loadInitialLeads();
   initNavigation();
   initFilters();
@@ -773,6 +784,17 @@ function scrollToElementTop(element, options = {}) {
   });
 }
 
+function preserveScrollPosition(callback) {
+  const scrollingElement = document.scrollingElement || document.documentElement;
+  const top = scrollingElement.scrollTop;
+  const left = scrollingElement.scrollLeft;
+  callback();
+  scrollingElement.scrollTo({ top, left, behavior: "auto" });
+  requestAnimationFrame(() => {
+    scrollingElement.scrollTo({ top, left, behavior: "auto" });
+  });
+}
+
 function initFilters() {
   const verticals = unique(conferences.map((event) => event.vertical));
   const regions = unique(conferences.map((event) => event.region));
@@ -797,22 +819,27 @@ function initLeadControls() {
 
   $("#leadSearch").addEventListener("input", (event) => {
     leadListState.search = event.target.value.trim().toLowerCase();
+    leadPage = 1;
     renderLeads();
   });
   $("#leadSignalFilter").addEventListener("input", (event) => {
     leadListState.signal = event.target.value;
+    leadPage = 1;
     renderLeads();
   });
   $("#leadStageFilter").addEventListener("input", (event) => {
     leadListState.stage = event.target.value;
+    leadPage = 1;
     renderLeads();
   });
   $("#leadConferenceFilter").addEventListener("input", (event) => {
     leadListState.conferenceId = event.target.value;
+    leadPage = 1;
     renderLeads();
   });
   $("#leadSort").addEventListener("input", (event) => {
     leadListState.sort = event.target.value;
+    leadPage = 1;
     renderLeads();
   });
 }
@@ -1158,7 +1185,7 @@ function renderConferences() {
     onPageChange: (page) => {
       conferencePage = page;
       renderConferences();
-      scrollToElementTop($("#conferences"), { onlyWhenBelow: true });
+      scrollToPageTop();
     },
   });
 }
@@ -1270,10 +1297,10 @@ function renderClusterList(clusters) {
     currentPage: clusterPage,
     totalPages,
     onPageChange: (page) => {
-      const scrollPosition = window.scrollY;
-      clusterPage = page;
-      renderClusterList(clusters);
-      window.scrollTo({ top: scrollPosition, left: window.scrollX, behavior: "auto" });
+      preserveScrollPosition(() => {
+        clusterPage = page;
+        renderClusterList(clusters);
+      });
     },
   });
 }
@@ -1344,21 +1371,28 @@ function createPageButton(label, page, disabled, active, onPageChange, ariaLabel
   button.setAttribute("aria-label", ariaLabel);
   button.disabled = disabled;
   if (active) button.setAttribute("aria-current", "page");
+  button.addEventListener("mousedown", (event) => event.preventDefault());
   button.addEventListener("click", () => onPageChange(page));
   return button;
 }
 
 function renderLeads() {
   const feed = $("#leadFeed");
+  const pagination = getPaginationContainer("leadPagination", feed);
   const visibleLeads = getVisibleLeads();
   feed.innerHTML = "";
+  pagination.innerHTML = "";
 
   if (!visibleLeads.length) {
     feed.innerHTML = '<p class="insight-item">No saved leads match this view. Clear filters or scan a new lead.</p>';
     return;
   }
 
-  visibleLeads.forEach((lead) => {
+  const totalPages = Math.max(1, Math.ceil(visibleLeads.length / LEADS_PER_PAGE));
+  leadPage = Math.min(leadPage, totalPages);
+  const pagedLeads = paginate(visibleLeads, leadPage, LEADS_PER_PAGE);
+
+  pagedLeads.forEach((lead) => {
     const conference = getConference(lead.conferenceId);
     const relationshipCount = getRelationshipCount(lead);
     const card = document.createElement("article");
@@ -1388,6 +1422,16 @@ function renderLeads() {
     );
     card.append(header, meta, notes);
     feed.append(card);
+  });
+
+  renderPagination(pagination, {
+    currentPage: leadPage,
+    totalPages,
+    onPageChange: (page) => {
+      leadPage = page;
+      renderLeads();
+      scrollToPageTop();
+    },
   });
 }
 
@@ -1681,7 +1725,7 @@ function getClusters(includeOwner = true) {
       if ((sameCity && days <= 21) || (sameRegion && days <= 10)) {
         clusters.push({
           region: sameCity ? first.city : first.region,
-          label: days === 0 ? "same week" : `${days} days apart`,
+          label: days === 0 ? "same week" : days === 1 ? "1 day apart" : `${days} days apart`,
           events: [first, second],
           owner: includeOwner ? recommendOwner([first, second]) : "",
         });
