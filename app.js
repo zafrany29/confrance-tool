@@ -5,6 +5,8 @@
 
 const DEFAULT_MODEL = "gpt-4.1-mini";
 const SEPARATOR = " - ";
+const CONFERENCES_PER_PAGE = 9;
+const CLUSTERS_PER_PAGE = 3;
 
 const leadSignals = [
   "Cross-border payments",
@@ -459,108 +461,155 @@ const conferences = [
 
 const conferenceOverrides = {
   "Money20/20 USA": {
+    source: "https://us.money2020.com/",
     sourceLabel: "Official event page",
+    conferenceURL: "https://us.money2020.com/",
     notes: "One of the strongest broad fintech events for Grain. Money20/20 reports 11,000+ senior attendees from 3,400+ companies, including banks, payment companies and fintechs. Strong opportunity to reach companies processing international payments and managing multi-currency exposure.",
     travelFit: 5,
   },
   "WTM London": {
+    source: "https://www.wtm.com/london/en-gb/visit/prepare-to-visit.html",
     sourceLabel: "Official event page",
+    conferenceURL: "https://www.wtm.com/london/en-gb.html",
     notes: "WTM reports 46,000+ attendees and 5,500+ buyers. Particularly relevant to Grain because tour operators, OTAs, DMCs and accommodation businesses frequently collect and pay in multiple currencies, creating structural FX exposure.",
   },
   "The Phocuswright Conference": {
-    sourceLabel: "Official event page",
+    source: "https://www.phocuswright.com/events",
+    sourceLabel: "Official Phocuswright events page",
+    conferenceURL: "https://www.phocuswrightconference.com/",
     notes: "Highly concentrated travel decision-maker audience. Approximately 65% of attendees are C-level or VP-level, making the smaller audience unusually valuable for Grain.",
   },
   "IMTM - International Mediterranean Tourism Market": {
+    source: "https://www.imtm-telaviv.com/",
     sourceLabel: "Official event page",
+    conferenceURL: "https://www.imtm-telaviv.com/",
     notes: "Israel's flagship B2B tourism marketplace. Travel wholesalers, agencies and international tourism companies commonly manage multi-currency supplier and customer flows, making this relevant to Grain.",
   },
   "Fintech Meetup": {
-    sourceLabel: "Official event page",
+    source: "https://fintechmeetup.com/2027-agenda?day=2027-02-22",
+    sourceLabel: "Official event agenda",
+    conferenceURL: "https://fintechmeetup.com/",
     notes: "Strong prospecting event because its format is built around curated double-opt-in meetings. It brings together banks, merchants, fintechs and financial institutions.",
     travelFit: 4,
   },
   "MarketHub Asia": {
+    source: "https://www.hbxgroup.com/markethub",
     sourceLabel: "Official HBX Group event page",
+    conferenceURL: "https://www.hbxgroup.com/markethub",
     notes: "B2B travel event bringing together wholesale distributors, global travel agencies, hoteliers and other travel trade decision-makers. These businesses frequently settle inventory and bookings across currencies.",
   },
   "Merchant Payments Ecosystem (MPE)": {
-    sourceLabel: "Official event page",
+    source: "https://www.merchantpaymentsecosystem.com/attend/",
+    sourceLabel: "Official MPE 2027 attendee page",
+    conferenceURL: "https://www.merchantpaymentsecosystem.com/",
     notes: "Very concentrated payments audience. Particularly attractive for Grain's PSP and cross-border payments ICP.",
     travelFit: 4,
   },
   "ITB Berlin": {
+    source: "https://www.itb.com/en",
     sourceLabel: "Official event page",
+    conferenceURL: "https://www.itb.com/en",
     notes: "Massive B2B travel marketplace. International tour operators, accommodation providers and travel platforms can have significant multi-currency receivables and supplier payments.",
   },
   "EuroFinance Treasury & Cash Management Summit San Francisco": {
+    source: "https://www.eurofinance.com/treasury-cash-management-summit-west-coast/",
     sourceLabel: "Official EuroFinance event page",
+    conferenceURL: "https://www.eurofinance.com/treasury-cash-management-summit-west-coast/",
     notes: "Extremely direct Grain fit. The event serves corporate treasurers at scale-ups and global enterprises managing cross-border cash flow, real-time payments, liquidity and FX risk.",
     travelFit: 2,
   },
   "International Payments Conference (IPC)": {
+    source: "https://www.ipa.org/ipc-445214.html",
     sourceLabel: "Official Innovative Payments Association event page",
+    conferenceURL: "https://www.ipa.org/ipc.html",
     notes: "Specialized payments gathering focused on payment innovation, regulation and companies building payment products.",
     travelFit: 2,
   },
   "Smarter Faster Payments 2027": {
+    source: "https://www.nacha.org/events/smarter-faster-payments-2027",
     sourceLabel: "Official Nacha event page",
+    conferenceURL: "https://payments.nacha.org/",
     notes: "Payments-industry conference bringing together payments experts, influencers and fintech solution providers.",
     travelFit: 2,
   },
   "TRANSACT 2027": {
-    sourceLabel: "Official TRANSACT event page",
+    source: "https://etatransact.com/register/",
+    sourceLabel: "Official TRANSACT registration and event details",
+    conferenceURL: "https://transactshow.com/",
     notes: "Strong payments prospecting opportunity bringing together issuers, processors, fintech founders, platforms and merchants.",
     travelFit: 3,
   },
   "MarketHub Europe": {
+    source: "https://www.hbxgroup.com/markethub",
     sourceLabel: "Official HBX Group event page",
+    conferenceURL: "https://www.hbxgroup.com/markethub",
     notes: "Highly targeted B2B travel distribution event with businesses that frequently have significant cross-border currency exposure.",
   },
   "PAY360": {
+    source: "https://pay360event.com/",
     sourceLabel: "Official event page",
+    conferenceURL: "https://pay360event.com/",
     notes: "Dedicated payments event with a high concentration of senior payments professionals and decision-makers.",
     travelFit: 3,
   },
   "Money20/20 Asia": {
+    source: "https://asia.money2020.com/attend",
     sourceLabel: "Official Money20/20 event page",
+    conferenceURL: "https://asia.money2020.com/",
+    audience: 5000,
     notes: "Asia-Pacific edition of Money20/20. Particularly interesting for Grain because the region contains significant cross-border commerce, payment and currency flows.",
     travelFit: 5,
   },
   "Payments Canada SUMMIT": {
+    source: "https://www.payments.ca/connect/annual-conference",
     sourceLabel: "Official Payments Canada event page",
+    conferenceURL: "https://www.thesummit.ca/",
     notes: "Strong concentration of payments infrastructure, financial institutions and fintech decision-makers.",
     travelFit: 2,
   },
   "SaaStr AI Annual": {
-    sourceLabel: "Official event page",
+    source: "https://saastr.ai/events/annual",
+    sourceLabel: "Official SaaStr event information",
+    conferenceURL: "https://saastrannual.com/",
     notes: "Useful for reaching fast-growing SaaS and marketplace companies expanding internationally and developing meaningful FX exposure.",
     travelFit: 2,
   },
   "Phocuswright Europe": {
+    source: "https://www.phocuswright.com/events",
     sourceLabel: "Official Phocuswright events page",
+    conferenceURL: "https://www.phocuswrighteurope.com/",
     notes: "Strong concentration of senior digital travel, distribution and technology decision-makers.",
   },
   "Money20/20 Europe": {
+    source: "https://europe.money2020.com/",
     sourceLabel: "Official event page",
+    conferenceURL: "https://europe.money2020.com/",
     notes: "Excellent concentration of European payments and fintech prospects with cross-border currency exposure.",
     travelFit: 5,
   },
   "TravelTech Show": {
+    source: "https://traveltech-show.com/",
     sourceLabel: "Official event page",
+    conferenceURL: "https://traveltech-show.com/",
     notes: "Smaller but highly targeted travel technology event with potentially high buyer density for Grain.",
   },
   "Sibos": {
-    sourceLabel: "Official Sibos event page",
+    source: "https://www.sibos.com/about/future-sibos",
+    sourceLabel: "Official Sibos future events page",
+    conferenceURL: "https://www.sibos.com/",
     notes: "Highly concentrated gathering of banks, transaction banking teams, payment infrastructure providers and fintechs. Strong cross-border payments and FX relevance.",
     travelFit: 3,
   },
   "IFTM - International & French Travel Market": {
+    source: "https://www.iftm.fr/",
     sourceLabel: "Official event page",
+    conferenceURL: "https://www.iftm.fr/",
     notes: "Large B2B travel trade show with a significant travel-agency audience and many businesses potentially exposed to international supplier and customer currencies.",
   },
   "EuroFinance International Treasury Management": {
+    source: "https://www.eurofinance.com/international-treasury-event/",
     sourceLabel: "Official event page",
+    conferenceURL: "https://www.eurofinance.com/international-treasury-event/",
     notes: "Exceptionally strong direct fit for Grain, bringing together senior treasury professionals responsible for FX risk, liquidity, cross-border payments and treasury transformation.",
     travelFit: 3,
   },
@@ -642,6 +691,8 @@ let leadListState = {
   conferenceId: "all",
   sort: "newest",
 };
+let conferencePage = 1;
+let clusterPage = 1;
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -655,6 +706,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initScanCapture();
   initSettings();
   initActions();
+  initDialogs();
   renderAll();
 });
 
@@ -698,7 +750,26 @@ function initNavigation() {
       tab.classList.add("active");
       const view = $(`#${tab.dataset.view}`);
       view.classList.add("active");
+      scrollToPageTop();
     });
+  });
+}
+
+function scrollToPageTop() {
+  requestAnimationFrame(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    document.documentElement.scrollTo?.({ top: 0, left: 0, behavior: "smooth" });
+    document.body.scrollTo?.({ top: 0, left: 0, behavior: "smooth" });
+  });
+}
+
+function scrollToElementTop(element, options = {}) {
+  if (!element) return;
+  requestAnimationFrame(() => {
+    const headerOffset = $(".topbar")?.offsetHeight || 0;
+    const top = element.getBoundingClientRect().top + window.scrollY - headerOffset - 12;
+    if (options.onlyWhenBelow && window.scrollY <= top + 24) return;
+    window.scrollTo({ top: Math.max(0, top), left: 0, behavior: "smooth" });
   });
 }
 
@@ -708,7 +779,10 @@ function initFilters() {
   fillSelect($("#verticalFilter"), verticals, "all");
   fillSelect($("#regionFilter"), regions, "all");
   ["#searchInput", "#verticalFilter", "#regionFilter", "#tierFilter"].forEach((id) => {
-    $(id).addEventListener("input", renderConferences);
+    $(id).addEventListener("input", () => {
+      conferencePage = 1;
+      renderConferences();
+    });
   });
 }
 
@@ -974,6 +1048,16 @@ function onClick(selector, handler) {
   $(selector)?.addEventListener("click", handler);
 }
 
+function initDialogs() {
+  $$("dialog").forEach((dialog) => {
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) {
+        dialog.close();
+      }
+    });
+  });
+}
+
 function renderAll() {
   renderSummary();
   renderConferences();
@@ -993,11 +1077,13 @@ function renderSummary() {
 
 function renderConferences() {
   const grid = $("#conferenceGrid");
+  const pagination = getPaginationContainer("conferencePagination", grid);
   const search = $("#searchInput").value.toLowerCase();
   const vertical = $("#verticalFilter").value;
   const region = $("#regionFilter").value;
   const tier = $("#tierFilter").value;
   grid.innerHTML = "";
+  pagination.innerHTML = "";
 
   const filtered = conferences
     .map((conference) => ({ ...conference, fit: scoreConference(conference) }))
@@ -1025,30 +1111,56 @@ function renderConferences() {
     })
     .sort((a, b) => b.fit.score - a.fit.score);
 
-  filtered.forEach((conference) => {
+  const totalPages = Math.max(1, Math.ceil(filtered.length / CONFERENCES_PER_PAGE));
+  conferencePage = Math.min(conferencePage, totalPages);
+  const visibleConferences = paginate(filtered, conferencePage, CONFERENCES_PER_PAGE);
+
+  visibleConferences.forEach((conference) => {
     const template = $("#conferenceCardTemplate").content.cloneNode(true);
+    template.querySelector(".conference-card").classList.add(`event-tier-${conference.fit.tier.toLowerCase()}`);
     const badge = template.querySelector(".tier-badge");
+    badge.setAttribute("role", "button");
+    badge.setAttribute("tabindex", "0");
+    badge.setAttribute("aria-label", `Why ${conference.name} scored ${conference.fit.score}`);
     badge.textContent = `Tier ${conference.fit.tier}${SEPARATOR}${conference.fit.score}`;
     badge.classList.add(`tier-${conference.fit.tier.toLowerCase()}`);
+    badge.addEventListener("click", () => openScoreDialog(conference));
+    badge.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openScoreDialog(conference);
+      }
+    });
     template.querySelector(".date-pill").textContent = formatDateRange(conference);
     template.querySelector("h3").textContent = conference.name;
     template.querySelector(".meta").textContent =
       `${conference.city}, ${conference.country}${SEPARATOR}${conference.vertical}${SEPARATOR}${formatAudience(conference.audience)}`;
     template.querySelector(".reason").textContent = conference.reason;
     template.querySelector(".score-bar span").style.width = `${conference.fit.score}%`;
-    template.querySelector(".score-details").addEventListener("click", () => {
-      openScoreDialog(conference);
-    });
     template.querySelector(".capture-here").addEventListener("click", () => {
       openView("field");
       $("#leadConference").value = conference.name;
     });
+    const registerLink = template.querySelector(".register-event");
+    registerLink.href = conference.conferenceURL || conference.source;
+    registerLink.setAttribute("aria-label", `Register for ${conference.name} on ${conference.sourceLabel}`);
     grid.append(template);
   });
 
   if (!filtered.length) {
     grid.innerHTML = '<p class="insight-item">No events match this filter set. Loosen the tier, region, or search term.</p>';
+    return;
   }
+
+  renderPagination(pagination, {
+    currentPage: conferencePage,
+    totalPages,
+    onPageChange: (page) => {
+      conferencePage = page;
+      renderConferences();
+      scrollToElementTop($("#conferences"), { onlyWhenBelow: true });
+    },
+  });
 }
 
 function openScoreDialog(conference) {
@@ -1101,13 +1213,7 @@ function renderPlanner() {
     timeline.append(row);
   }
 
-  renderInsightList(
-    $("#clusterList"),
-    getClusters().map((cluster) => ({
-      title: `${cluster.region}${SEPARATOR}${cluster.label}`,
-      body: `${cluster.events.map((event) => event.name).join(", ")}. Suggested owner: ${cluster.owner}.`,
-    })),
-  );
+  renderClusterList(getClusters());
 
   const highFitByRegion = conferences
     .filter((event) => scoreConference(event).tier === "A")
@@ -1132,6 +1238,116 @@ function renderPlanner() {
   ]);
 }
 
+function renderClusterList(clusters) {
+  const list = $("#clusterList");
+  const pagination = getPaginationContainer("clusterPagination", list);
+  list.innerHTML = "";
+  pagination.innerHTML = "";
+
+  if (!clusters.length) {
+    list.innerHTML = '<p class="insight-item">No trip clusters found yet.</p>';
+    return;
+  }
+
+  const totalPages = Math.max(1, Math.ceil(clusters.length / CLUSTERS_PER_PAGE));
+  clusterPage = Math.min(clusterPage, totalPages);
+  const visibleClusters = paginate(clusters, clusterPage, CLUSTERS_PER_PAGE);
+
+  visibleClusters.forEach((cluster, index) => {
+    const clusterIndex = (clusterPage - 1) * CLUSTERS_PER_PAGE + index;
+    const item = document.createElement("article");
+    item.className = "insight-item cluster-item";
+    item.innerHTML = `
+      <strong>${cluster.region}${SEPARATOR}${cluster.label}</strong>
+      <p>${cluster.events.map((event) => event.name).join(", ")}. Suggested owner: ${cluster.owner}.</p>
+      <button class="ghost-button small" type="button">View details</button>
+    `;
+    item.querySelector("button").addEventListener("click", () => openClusterDialog(cluster, clusterIndex));
+    list.append(item);
+  });
+
+  renderPagination(pagination, {
+    currentPage: clusterPage,
+    totalPages,
+    onPageChange: (page) => {
+      const scrollPosition = window.scrollY;
+      clusterPage = page;
+      renderClusterList(clusters);
+      window.scrollTo({ top: scrollPosition, left: window.scrollX, behavior: "auto" });
+    },
+  });
+}
+
+function openClusterDialog(cluster, index) {
+  $("#clusterDialogTitle").textContent = `${cluster.region}${SEPARATOR}${cluster.label}`;
+  $("#clusterDialogBody").innerHTML = `
+    <p class="score-note">Suggested owner: <strong>${cluster.owner}</strong>. Cluster ${index + 1} groups events that are close enough in timing or city to consider one coordinated trip.</p>
+    <div class="detail-list">
+      ${cluster.events
+        .map((event) => {
+          const fit = scoreConference(event);
+          return `
+            <article class="detail-row">
+              <strong>${event.name}</strong>
+              <p>${formatFullDateRange(event)}${SEPARATOR}${event.city}, ${event.country}</p>
+              <p>${event.vertical}${SEPARATOR}Tier ${fit.tier}${SEPARATOR}${fit.score}/100${SEPARATOR}${formatAudience(event.audience)}</p>
+            </article>
+          `;
+        })
+        .join("")}
+    </div>
+  `;
+  $("#clusterDialog").showModal();
+}
+
+function paginate(items, currentPage, pageSize) {
+  const start = (currentPage - 1) * pageSize;
+  return items.slice(start, start + pageSize);
+}
+
+function getPaginationContainer(id, anchor) {
+  let container = $(`#${id}`);
+  if (!container) {
+    container = document.createElement("nav");
+    container.id = id;
+    container.className = "pagination";
+    container.setAttribute("aria-label", id === "conferencePagination" ? "Conference pages" : "Trip cluster pages");
+    anchor.insertAdjacentElement("afterend", container);
+  }
+  return container;
+}
+
+function renderPagination(container, { currentPage, totalPages, onPageChange }) {
+  if (totalPages <= 1) {
+    container.innerHTML = "";
+    return;
+  }
+
+  container.innerHTML = "";
+  const controls = document.createElement("div");
+  controls.className = "pagination-controls";
+  controls.append(createPageButton("<", currentPage - 1, currentPage === 1, false, onPageChange, "Previous page"));
+
+  for (let page = 1; page <= totalPages; page += 1) {
+    controls.append(createPageButton(String(page), page, false, page === currentPage, onPageChange, `Page ${page}`));
+  }
+
+  controls.append(createPageButton(">", currentPage + 1, currentPage === totalPages, false, onPageChange, "Next page"));
+  container.append(controls);
+}
+
+function createPageButton(label, page, disabled, active, onPageChange, ariaLabel = label) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = active ? "page-button active" : "page-button";
+  button.textContent = label;
+  button.setAttribute("aria-label", ariaLabel);
+  button.disabled = disabled;
+  if (active) button.setAttribute("aria-current", "page");
+  button.addEventListener("click", () => onPageChange(page));
+  return button;
+}
+
 function renderLeads() {
   const feed = $("#leadFeed");
   const visibleLeads = getVisibleLeads();
@@ -1150,16 +1366,19 @@ function renderLeads() {
     const identity = document.createElement("div");
     const name = document.createElement("h4");
     const company = document.createElement("p");
-    const score = document.createElement("span");
+    const score = document.createElement("button");
     const meta = document.createElement("div");
     const notes = document.createElement("p");
 
     card.className = "lead-card";
     score.className = "lead-score";
+    score.type = "button";
     meta.className = "lead-meta";
     name.textContent = lead.name;
     company.textContent = `${lead.company}${lead.title ? `${SEPARATOR}${lead.title}` : ""}`;
     score.textContent = leadQualityScore(lead);
+    score.setAttribute("aria-label", `Why ${lead.name} scored ${score.textContent}`);
+    score.addEventListener("click", () => openLeadScoreDialog(lead));
     notes.textContent = lead.notes || "No field notes yet. Add the pain, owner, urgency, or promised next step.";
 
     identity.append(name, company);
@@ -1170,6 +1389,61 @@ function renderLeads() {
     card.append(header, meta, notes);
     feed.append(card);
   });
+}
+
+function openLeadScoreDialog(lead) {
+  const conference = getConference(lead.conferenceId);
+  const breakdown = leadScoreBreakdown(lead);
+  const quality = leadQualityLabel(breakdown.total);
+  $("#leadScoreDialogTitle").textContent = `${lead.name}${SEPARATOR}${breakdown.total}/100${SEPARATOR}${quality}`;
+  $("#leadScoreDialogBody").innerHTML = `
+    ${scoreMetric("Conference fit", breakdown.conferenceFit, 45)}
+    ${scoreMetric("ICP signal", breakdown.signalFit, 25)}
+    ${scoreMetric("Conversation stage", breakdown.stageFit, 28)}
+    <div class="detail-list">
+      <article class="detail-row">
+        <strong>conclution</strong>
+        <p>${leadScoreMeaning(breakdown.total)}</p>
+      </article>
+      <article class="detail-row">
+        <strong>Conference fit</strong>
+        <p>${conference.name} is Tier ${scoreConference(conference).tier} for Grain. This category converts the conference ICP score into up to 45 lead points.</p>
+      </article>
+      <article class="detail-row">
+        <strong>ICP signal</strong>
+        <p>${lead.signal} adds ${breakdown.signalFit}/25 based on how directly the lead maps to Grain's strongest buying triggers.</p>
+      </article>
+      <article class="detail-row">
+        <strong>Conversation stage</strong>
+        <p>${lead.stage} adds ${breakdown.stageFit}/28 based on urgency, owner clarity, and whether there is a concrete follow-up path.</p>
+      </article>
+    </div>
+  `;
+  $("#leadScoreDialog").showModal();
+}
+
+function leadScoreBreakdown(lead) {
+  const conferenceFit = Math.round(scoreConference(getConference(lead.conferenceId)).score * 0.45);
+  const signalFit = signalScores[lead.signal] || 0;
+  const stageFit = stageScores[lead.stage] || 0;
+  return {
+    conferenceFit,
+    signalFit,
+    stageFit,
+    total: Math.min(100, Math.round(conferenceFit + signalFit + stageFit)),
+  };
+}
+
+function leadQualityLabel(score) {
+  if (score >= 75) return "High intent";
+  if (score >= 52) return "Medium intent";
+  return "Low intent";
+}
+
+function leadScoreMeaning(score) {
+  if (score >= 75) return "Prioritize same-day follow-up. The event context, ICP signal, and conversation stage suggest a strong chance of a relevant buyer conversation.";
+  if (score >= 52) return "Worth follow-up, but qualify the business owner and urgency before investing heavy sales time.";
+  return "Treat as light nurture or partner curiosity unless a clearer pain, owner, or budget signal appears.";
 }
 
 async function extractLeadFromQrOrImage(file, dataUrl) {
@@ -1584,11 +1858,7 @@ Grain team`;
 }
 
 function leadQualityScore(lead) {
-  const conference = getConference(lead.conferenceId);
-  const base = scoreConference(conference).score * 0.45;
-  const signalScore = signalScores[lead.signal] || 0;
-  const stageScore = stageScores[lead.stage] || 0;
-  return Math.min(100, Math.round(base + signalScore + stageScore));
+  return leadScoreBreakdown(lead).total;
 }
 
 async function pushLead() {
@@ -1759,6 +2029,14 @@ function formatDateRange(conference) {
   const end = new Date(`${conference.endDate}T00:00:00`);
   const month = start.toLocaleString("en", { month: "short" });
   return `${month} ${start.getDate()}-${end.getDate()}`;
+}
+
+function formatFullDateRange(conference) {
+  const start = new Date(`${conference.startDate}T00:00:00`);
+  const end = new Date(`${conference.endDate}T00:00:00`);
+  const startText = start.toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" });
+  const endText = end.toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" });
+  return startText === endText ? startText : `${startText} - ${endText}`;
 }
 
 function formatNumber(number) {

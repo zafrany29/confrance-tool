@@ -338,8 +338,8 @@
         <p class="reason"></p>
         <div class="score-bar"><span></span></div>
         <div class="card-actions">
-          <button class="ghost-button small score-details" type="button">Why this score</button>
           <button class="primary-button small capture-here" type="button">Log lead here</button>
+          <a class="primary-button small register-event" href="#" target="_blank" rel="noreferrer">Register</a>
         </div>
       </article>
     </template>
@@ -354,6 +354,32 @@
           <button class="icon-button" value="close" aria-label="Close score details">x</button>
         </div>
         <div id="scoreDialogBody" class="score-details-body"></div>
+      </form>
+    </dialog>
+
+    <dialog id="clusterDialog" class="score-dialog">
+      <form method="dialog">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow">Trip cluster details</p>
+            <h2 id="clusterDialogTitle">Combined trip</h2>
+          </div>
+          <button class="icon-button" value="close" aria-label="Close trip details">x</button>
+        </div>
+        <div id="clusterDialogBody" class="score-details-body"></div>
+      </form>
+    </dialog>
+
+    <dialog id="leadScoreDialog" class="score-dialog">
+      <form method="dialog">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow">Lead score breakdown</p>
+            <h2 id="leadScoreDialogTitle">Lead score</h2>
+          </div>
+          <button class="icon-button" value="close" aria-label="Close lead score details">x</button>
+        </div>
+        <div id="leadScoreDialogBody" class="score-details-body"></div>
       </form>
     </dialog>
 
