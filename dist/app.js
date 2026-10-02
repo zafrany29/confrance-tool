@@ -1,10 +1,9 @@
-﻿﻿const storageKeys = {
+﻿const storageKeys = {
   leads: "grainConferenceLeads",
   settings: "grainConferenceSettings",
 };
 
 const DEFAULT_MODEL = "gpt-4.1-mini";
-const LEADS_DATA_URL = "data/leads.json";
 const SEPARATOR = " - ";
 
 const leadSignals = [
@@ -458,7 +457,122 @@ const conferences = [
   },
 ];
 
-const sampleLeads = [
+const conferenceOverrides = {
+  "Money20/20 USA": {
+    sourceLabel: "Official event page",
+    notes: "One of the strongest broad fintech events for Grain. Money20/20 reports 11,000+ senior attendees from 3,400+ companies, including banks, payment companies and fintechs. Strong opportunity to reach companies processing international payments and managing multi-currency exposure.",
+    travelFit: 5,
+  },
+  "WTM London": {
+    sourceLabel: "Official event page",
+    notes: "WTM reports 46,000+ attendees and 5,500+ buyers. Particularly relevant to Grain because tour operators, OTAs, DMCs and accommodation businesses frequently collect and pay in multiple currencies, creating structural FX exposure.",
+  },
+  "The Phocuswright Conference": {
+    sourceLabel: "Official event page",
+    notes: "Highly concentrated travel decision-maker audience. Approximately 65% of attendees are C-level or VP-level, making the smaller audience unusually valuable for Grain.",
+  },
+  "IMTM - International Mediterranean Tourism Market": {
+    sourceLabel: "Official event page",
+    notes: "Israel's flagship B2B tourism marketplace. Travel wholesalers, agencies and international tourism companies commonly manage multi-currency supplier and customer flows, making this relevant to Grain.",
+  },
+  "Fintech Meetup": {
+    sourceLabel: "Official event page",
+    notes: "Strong prospecting event because its format is built around curated double-opt-in meetings. It brings together banks, merchants, fintechs and financial institutions.",
+    travelFit: 4,
+  },
+  "MarketHub Asia": {
+    sourceLabel: "Official HBX Group event page",
+    notes: "B2B travel event bringing together wholesale distributors, global travel agencies, hoteliers and other travel trade decision-makers. These businesses frequently settle inventory and bookings across currencies.",
+  },
+  "Merchant Payments Ecosystem (MPE)": {
+    sourceLabel: "Official event page",
+    notes: "Very concentrated payments audience. Particularly attractive for Grain's PSP and cross-border payments ICP.",
+    travelFit: 4,
+  },
+  "ITB Berlin": {
+    sourceLabel: "Official event page",
+    notes: "Massive B2B travel marketplace. International tour operators, accommodation providers and travel platforms can have significant multi-currency receivables and supplier payments.",
+  },
+  "EuroFinance Treasury & Cash Management Summit San Francisco": {
+    sourceLabel: "Official EuroFinance event page",
+    notes: "Extremely direct Grain fit. The event serves corporate treasurers at scale-ups and global enterprises managing cross-border cash flow, real-time payments, liquidity and FX risk.",
+    travelFit: 2,
+  },
+  "International Payments Conference (IPC)": {
+    sourceLabel: "Official Innovative Payments Association event page",
+    notes: "Specialized payments gathering focused on payment innovation, regulation and companies building payment products.",
+    travelFit: 2,
+  },
+  "Smarter Faster Payments 2027": {
+    sourceLabel: "Official Nacha event page",
+    notes: "Payments-industry conference bringing together payments experts, influencers and fintech solution providers.",
+    travelFit: 2,
+  },
+  "TRANSACT 2027": {
+    sourceLabel: "Official TRANSACT event page",
+    notes: "Strong payments prospecting opportunity bringing together issuers, processors, fintech founders, platforms and merchants.",
+    travelFit: 3,
+  },
+  "MarketHub Europe": {
+    sourceLabel: "Official HBX Group event page",
+    notes: "Highly targeted B2B travel distribution event with businesses that frequently have significant cross-border currency exposure.",
+  },
+  "PAY360": {
+    sourceLabel: "Official event page",
+    notes: "Dedicated payments event with a high concentration of senior payments professionals and decision-makers.",
+    travelFit: 3,
+  },
+  "Money20/20 Asia": {
+    sourceLabel: "Official Money20/20 event page",
+    notes: "Asia-Pacific edition of Money20/20. Particularly interesting for Grain because the region contains significant cross-border commerce, payment and currency flows.",
+    travelFit: 5,
+  },
+  "Payments Canada SUMMIT": {
+    sourceLabel: "Official Payments Canada event page",
+    notes: "Strong concentration of payments infrastructure, financial institutions and fintech decision-makers.",
+    travelFit: 2,
+  },
+  "SaaStr AI Annual": {
+    sourceLabel: "Official event page",
+    notes: "Useful for reaching fast-growing SaaS and marketplace companies expanding internationally and developing meaningful FX exposure.",
+    travelFit: 2,
+  },
+  "Phocuswright Europe": {
+    sourceLabel: "Official Phocuswright events page",
+    notes: "Strong concentration of senior digital travel, distribution and technology decision-makers.",
+  },
+  "Money20/20 Europe": {
+    sourceLabel: "Official event page",
+    notes: "Excellent concentration of European payments and fintech prospects with cross-border currency exposure.",
+    travelFit: 5,
+  },
+  "TravelTech Show": {
+    sourceLabel: "Official event page",
+    notes: "Smaller but highly targeted travel technology event with potentially high buyer density for Grain.",
+  },
+  "Sibos": {
+    sourceLabel: "Official Sibos event page",
+    notes: "Highly concentrated gathering of banks, transaction banking teams, payment infrastructure providers and fintechs. Strong cross-border payments and FX relevance.",
+    travelFit: 3,
+  },
+  "IFTM - International & French Travel Market": {
+    sourceLabel: "Official event page",
+    notes: "Large B2B travel trade show with a significant travel-agency audience and many businesses potentially exposed to international supplier and customer currencies.",
+  },
+  "EuroFinance International Treasury Management": {
+    sourceLabel: "Official event page",
+    notes: "Exceptionally strong direct fit for Grain, bringing together senior treasury professionals responsible for FX risk, liquidity, cross-border payments and treasury transformation.",
+    travelFit: 3,
+  },
+};
+
+conferences.forEach((conference) => {
+  const override = conferenceOverrides[conference.name];
+  if (!override) return;
+  Object.assign(conference, override, { reason: override.notes });
+});
+
+const demoLeads = [
   {
     id: "lead-1",
     conferenceId: "itb-berlin-2027",
@@ -557,24 +671,19 @@ function saveLeads() {
   localStorage.setItem(storageKeys.leads, JSON.stringify(leads));
 }
 
-async function loadInitialLeads() {
+function loadInitialLeads() {
+  if (!Array.isArray(leads)) {
+    leads = normalizeImportedLeads(demoLeads);
+    saveLeads();
+    return;
+  }
   if (leads.length) {
     leads = normalizeImportedLeads(leads);
     saveLeads();
     return;
   }
-  leads = await loadSeedLeads();
+  leads = normalizeImportedLeads(demoLeads);
   saveLeads();
-}
-
-async function loadSeedLeads() {
-  try {
-    const response = await fetch(LEADS_DATA_URL, { cache: "no-store" });
-    if (!response.ok) throw new Error(`Could not load ${LEADS_DATA_URL}`);
-    return normalizeImportedLeads(await response.json());
-  } catch {
-    return sampleLeads;
-  }
 }
 
 function saveSettings() {
@@ -852,18 +961,17 @@ function setScanStatus(title, body) {
 }
 
 function initActions() {
-  $("#resetData").addEventListener("click", async () => {
-    leads = await loadSeedLeads();
-    saveLeads();
-    renderAll();
-  });
-  $("#runAi").addEventListener("click", generateAiCoachNote);
-  $("#copyAiPrompt").addEventListener("click", copyAiPrompt);
-  $("#pushHubspot").addEventListener("click", pushLead);
-  $("#exportCsv").addEventListener("click", exportCsv);
-  $("#exportJson").addEventListener("click", exportJson);
-  $("#importJsonButton").addEventListener("click", () => $("#importJsonInput").click());
-  $("#importJsonInput").addEventListener("change", importJson);
+  onClick("#runAi", generateAiCoachNote);
+  onClick("#copyAiPrompt", copyAiPrompt);
+  onClick("#pushHubspot", pushLead);
+  onClick("#exportCsv", exportCsv);
+  onClick("#exportJson", exportJson);
+  onClick("#importJsonButton", () => $("#importJsonInput")?.click());
+  $("#importJsonInput")?.addEventListener("change", importJson);
+}
+
+function onClick(selector, handler) {
+  $(selector)?.addEventListener("click", handler);
 }
 
 function renderAll() {
@@ -1626,7 +1734,7 @@ function getSelectedLead(selector) {
 }
 
 function getConference(id) {
-  return conferences.find((conference) => conference.id === id);
+  return conferences.find((conference) => conference.id === id) || conferences[0];
 }
 
 function leadLabel(lead) {
@@ -1706,4 +1814,3 @@ function levenshtein(a, b) {
   }
   return matrix[b.length][a.length];
 }
-
