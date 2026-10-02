@@ -1,4 +1,4 @@
-<!doctype html>
+﻿﻿<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -19,14 +19,14 @@
     <header class="topbar">
       <div>
         <p class="eyebrow">Grain sales workspace</p>
-        <h1>Conference Intelligence</h1>
+        <h1>Conference Pipeline Planner</h1>
       </div>
       <nav class="nav-tabs" aria-label="Main views">
-        <button class="tab active" data-view="conferences">Conferences</button>
-        <button class="tab" data-view="planner">Planner</button>
-        <button class="tab" data-view="field">Field capture</button>
-        <button class="tab" data-view="relationships">Relationships</button>
-        <button class="tab" data-view="integrations">HubSpot & AI</button>
+        <button class="tab active" data-view="conferences">Pick events</button>
+        <button class="tab" data-view="planner">Plan trips</button>
+        <button class="tab" data-view="field">Scan leads</button>
+        <button class="tab" data-view="relationships">Repeat buyers</button>
+        <button class="tab" data-view="integrations">Coach & sync</button>
       </nav>
     </header>
 
@@ -34,29 +34,29 @@
       <section class="scoreboard" aria-label="Sales priorities">
         <article>
           <span id="tierA">0</span>
-          <p>Tier A conferences</p>
+          <p>must-cover events</p>
         </article>
         <article>
           <span id="tripClusters">0</span>
-          <p>trip clusters</p>
+          <p>clusterable trips</p>
         </article>
         <article>
           <span id="relationshipSignals">0</span>
-          <p>relationship signals</p>
+          <p>repeat-contact signals</p>
         </article>
         <article>
           <span id="capturedLeads">0</span>
-          <p>captured leads</p>
+          <p>saved leads</p>
         </article>
       </section>
 
       <section id="conferences" class="view active">
         <div class="section-head">
           <div>
-            <h2>Prioritize the right rooms</h2>
-            <p>Score favors payments, fintech, treasury, travel wholesalers, FX exposure, buyer seniority, and deal density.</p>
+            <h2>Pick conferences worth the travel</h2>
+            <p>Rank events by Grain ICP fit: payments, treasury, travel wholesalers, FX exposure, buyer seniority, and trip leverage.</p>
           </div>
-          <button id="resetData" class="ghost-button">Reset sample data</button>
+          <button id="resetData" class="ghost-button">Restore demo leads</button>
         </div>
 
         <div class="filters" aria-label="Conference filters">
@@ -92,21 +92,21 @@
       <section id="planner" class="view">
         <div class="section-head">
           <div>
-            <h2>Coverage plan</h2>
-            <p>See month-by-month investment, geography clusters, and missed ICP pockets.</p>
+            <h2>Turn events into an efficient travel plan</h2>
+            <p>Find heavy months, nearby events, and ICP gaps before the team books flights.</p>
           </div>
         </div>
         <div class="planner-layout">
           <div>
-            <h3>Calendar density</h3>
+            <h3>Busy months</h3>
             <div id="monthTimeline" class="timeline"></div>
           </div>
           <div>
-            <h3>Trip clusters</h3>
+            <h3>Trips to combine</h3>
             <div id="clusterList" class="stack"></div>
           </div>
           <div>
-            <h3>Coverage gaps</h3>
+            <h3>Where coverage is thin</h3>
             <div id="gapList" class="stack"></div>
           </div>
         </div>
@@ -117,35 +117,35 @@
           <form id="leadForm" class="lead-form">
             <div class="section-head compact">
               <div>
-                <h2>Manual lead capture</h2>
-                <p>Scan first when the rep is moving fast. Manual entry stays available when the camera or extraction fails.</p>
+                <h2>Capture a lead in under a minute</h2>
+                <p>Scan what they hand you first. Type only what the camera cannot read.</p>
               </div>
             </div>
             <section class="scan-panel" aria-label="Photo-first capture">
               <div class="scan-actions">
                 <button id="scanBadge" class="scan-button" type="button">
-                  <span>▣</span>
-                  Scan badge
+                  <span>ID</span>
+                  Badge
                 </button>
                 <button id="scanCard" class="scan-button" type="button">
-                  <span>▤</span>
-                  Scan card
+                  <span>BC</span>
+                  Card
                 </button>
                 <button id="scanQr" class="scan-button" type="button">
-                  <span>⌗</span>
-                  Scan QR
+                  <span>QR</span>
+                  QR code
                 </button>
                 <button id="recordConversation" class="scan-button disabled" type="button" aria-disabled="true">
-                  <span>●</span>
-                  Record conversation
+                  <span>REC</span>
+                  Record notes
                 </button>
               </div>
               <input id="badgeImageInput" class="hidden-input" type="file" accept="image/*" capture="environment" />
               <input id="cardImageInput" class="hidden-input" type="file" accept="image/*" capture="environment" />
               <input id="qrImageInput" class="hidden-input" type="file" accept="image/*" capture="environment" />
               <div id="scanStatus" class="scan-status">
-                <strong>Ready to capture</strong>
-                <p>Badge/card/QR extraction uses the configured OpenAI key when needed. Without a key, the app fills demo data so the flow is visible.</p>
+                <strong>Start with a scan</strong>
+                <p>Use badge, card, or QR capture to prefill the lead. Demo data appears when no AI key is configured.</p>
               </div>
               <img id="scanPreview" class="scan-preview" alt="Captured badge or business card preview" hidden />
             </section>
@@ -205,11 +205,11 @@
               <button type="button" data-tag="CFO owner">CFO owner</button>
               <button type="button" data-tag="Follow up today">Follow up today</button>
             </div>
-            <button class="primary-button" type="submit">Save lead</button>
+            <button class="primary-button" type="submit">Save lead for follow-up</button>
           </form>
 
           <aside class="capture-feed">
-            <h3>Captured leads</h3>
+            <h3>Sort leads by next move</h3>
             <div class="lead-controls" aria-label="Lead list controls">
               <label>
                 Find lead
@@ -256,8 +256,8 @@
       <section id="relationships" class="view">
         <div class="section-head">
           <div>
-            <h2>Cross-conference intelligence</h2>
-            <p>Fuzzy matching looks at email, name variants, company domain, title changes, and repeated intent.</p>
+            <h2>Spot repeat contacts before they go cold</h2>
+            <p>Match email, name variants, company changes, and intent shifts across events.</p>
           </div>
         </div>
         <div id="relationshipList" class="relationship-grid"></div>
@@ -266,9 +266,9 @@
       <section id="integrations" class="view">
         <div class="integration-layout">
           <article class="panel">
-            <h2>AI follow-up coach</h2>
+            <h2>Draft the right follow-up</h2>
             <p>
-              Uses the selected lead, conference context, and relationship history to draft a short follow-up and next-step judgment.
+              Uses the selected lead, conference context, and relationship history to suggest priority, next step, and email copy.
               Add an OpenAI API key to run live AI, or use the transparent local fallback for demos.
             </p>
             <div class="settings-grid">
@@ -286,16 +286,16 @@
               <select id="aiLeadSelect"></select>
             </label>
             <div class="button-row">
-              <button id="runAi" class="primary-button" type="button">Generate coach note</button>
-              <button id="copyAiPrompt" class="ghost-button" type="button">Copy prompt</button>
+              <button id="runAi" class="primary-button" type="button">Draft follow-up</button>
+              <button id="copyAiPrompt" class="ghost-button" type="button">Copy AI prompt</button>
             </div>
-            <pre id="aiOutput" class="output-box">Select a lead and generate a coaching note.</pre>
+            <pre id="aiOutput" class="output-box">Select a lead to draft a follow-up.</pre>
           </article>
 
           <article class="panel">
-            <h2>HubSpot handoff</h2>
+            <h2>Send clean lead data to HubSpot</h2>
             <p>
-              Configure either a HubSpot private app token for direct contact creation or a webhook URL for Zapier, Make, or a tiny serverless proxy.
+              Send a selected lead through HubSpot, a webhook, or CSV export.
               Export remains available when the show floor connection is poor.
             </p>
             <div class="settings-grid">
@@ -313,15 +313,15 @@
               <select id="hubspotLeadSelect"></select>
             </label>
             <div class="button-row">
-              <button id="pushHubspot" class="primary-button" type="button">Push selected lead</button>
+              <button id="pushHubspot" class="primary-button" type="button">Send selected lead</button>
               <button id="exportCsv" class="ghost-button" type="button">Export CSV</button>
             </div>
-            <pre id="hubspotOutput" class="output-box">HubSpot payloads include contact properties, event name, ICP score, and notes.</pre>
+            <pre id="hubspotOutput" class="output-box">Select a lead to preview or send its CRM payload.</pre>
           </article>
 
           <article class="panel sources">
-            <h2>Sample data sources</h2>
-            <p>The dataset is intentionally small and editable. Dates and audience sizes should be refreshed before a real buying decision.</p>
+            <h2>Where the demo data came from</h2>
+            <p>Public event pages seed the demo; audience sizes and fit assumptions should be refreshed before spend decisions.</p>
             <ul id="sourceList"></ul>
           </article>
         </div>
@@ -339,8 +339,8 @@
         <p class="reason"></p>
         <div class="score-bar"><span></span></div>
         <div class="card-actions">
-          <button class="ghost-button small score-details" type="button">Score details</button>
-          <button class="primary-button small capture-here" type="button">Capture lead</button>
+          <button class="ghost-button small score-details" type="button">Why this score</button>
+          <button class="primary-button small capture-here" type="button">Log lead here</button>
         </div>
       </article>
     </template>
@@ -352,7 +352,7 @@
             <p class="eyebrow">ICP score breakdown</p>
             <h2 id="scoreDialogTitle">Conference score</h2>
           </div>
-          <button class="icon-button" value="close" aria-label="Close score details">×</button>
+          <button class="icon-button" value="close" aria-label="Close score details">x</button>
         </div>
         <div id="scoreDialogBody" class="score-details-body"></div>
       </form>

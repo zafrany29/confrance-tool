@@ -389,7 +389,7 @@ button:focus-visible {
 
 .field-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+  grid-template-columns: minmax(0, 1.25fr) minmax(340px, 0.75fr);
   gap: 14px;
 }
 
@@ -441,7 +441,15 @@ button:focus-visible {
 }
 
 .scan-button span {
+  display: inline-flex;
+  min-width: 38px;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #eef3f1;
   font-size: 1.35rem;
+  font-weight: 900;
   line-height: 1;
 }
 
@@ -670,7 +678,11 @@ button:focus-visible {
   color: var(--muted);
 }
 
-@media (max-width: 1050px) {
+@media (max-width: 960px) {
+  body {
+    padding-bottom: 88px;
+  }
+
   .topbar,
   .field-layout,
   .planner-layout,
@@ -678,22 +690,57 @@ button:focus-visible {
     grid-template-columns: 1fr;
   }
 
-  .conference-grid,
-  .relationship-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .filters {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 720px) {
   .topbar {
     position: static;
+    gap: 12px;
+    padding: 16px;
   }
 
-  .scoreboard,
+  .topbar h1 {
+    font-size: 1.35rem;
+  }
+
+  .nav-tabs {
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 16px 50px rgba(12, 45, 46, 0.2);
+    padding: 8px;
+    backdrop-filter: blur(14px);
+  }
+
+  .tab {
+    min-height: 48px;
+    padding: 0 6px;
+    font-size: 0.78rem;
+    line-height: 1.15;
+    white-space: normal;
+  }
+
+  main {
+    padding: 18px 14px 28px;
+  }
+
+  .scoreboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .scoreboard article {
+    padding: 14px;
+  }
+
+  .scoreboard span {
+    font-size: 1.45rem;
+  }
+
   .conference-grid,
   .relationship-grid,
   .filters,
@@ -704,16 +751,63 @@ button:focus-visible {
 
   .section-head {
     display: grid;
+    gap: 10px;
   }
 
-  .nav-tabs {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    padding-bottom: 2px;
+  .section-head .ghost-button {
+    width: 100%;
   }
 
-  .tab {
-    flex: 0 0 auto;
+  .conference-card,
+  .lead-form,
+  .capture-feed,
+  .panel,
+  .planner-layout > div,
+  .relationship-card {
+    box-shadow: none;
+  }
+
+  .conference-card {
+    min-height: auto;
+    padding: 16px;
+  }
+
+  .card-actions,
+  .button-row {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .card-actions .small,
+  .button-row button,
+  .primary-button,
+  .ghost-button {
+    min-height: 46px;
+  }
+
+  .scan-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .scan-button {
+    min-height: 68px;
+  }
+
+  .lead-card header,
+  .relationship-card header {
+    display: grid;
+  }
+
+  .lead-score {
+    width: 54px;
+  }
+
+  .output-box {
+    max-height: 340px;
+  }
+
+  .score-dialog {
+    width: calc(100vw - 20px);
   }
 
   .score-metric {
@@ -724,7 +818,21 @@ button:focus-visible {
     text-align: left;
   }
 
-  .scan-actions {
+  .score-dialog form {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .nav-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  body {
+    padding-bottom: 138px;
+  }
+
+  .scoreboard {
     grid-template-columns: 1fr;
   }
 }

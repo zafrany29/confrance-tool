@@ -4,6 +4,7 @@
 };
 
 const DEFAULT_MODEL = "gpt-4.1-mini";
+const LEADS_DATA_URL = "data/leads.json";
 const SEPARATOR = " - ";
 
 const leadSignals = [
@@ -51,230 +52,416 @@ const conferences = [
     region: "North America",
     vertical: "Fintech / Payments",
     audience: 11000,
-    personas: ["PSP", "Fintech", "Banking", "Cross-border payments"],
+    personas: ["PSP", "Fintech", "Banking", "Cross-border payments", "Payment leaders", "CFO / Finance"],
     estimatedBuyerDensity: 9,
     fxFit: 9,
-    travelFit: 4,
-    source: "https://www.money2020.com/",
-    sourceLabel: "Money20/20 official site",
-    reason:
-      "Highest-density room for payment leaders, PSPs, banks, and fintech operators with budget and partnership intent.",
+    travelFit: 3,
+    source: "https://us.money2020.com/",
+    sourceLabel: "Money20/20 USA official page",
+    reason: "Money20/20 reports 11,000+ senior attendees from 3,400+ companies, including banks, payment companies, and fintechs. Strong room for international payments and multi-currency exposure.",
   },
   {
-    id: "finovatefall-2026",
-    name: "FinovateFall",
-    startDate: "2026-09-09",
-    endDate: "2026-09-11",
-    city: "New York",
+    id: "wtm-london-2026",
+    name: "WTM London",
+    startDate: "2026-11-03",
+    endDate: "2026-11-05",
+    city: "London",
+    country: "United Kingdom",
+    region: "Europe",
+    vertical: "Travel / Tourism",
+    audience: 46000,
+    personas: ["Travel wholesalers", "Tour operators", "OTAs", "DMCs", "Travel technology", "Travel buyers"],
+    estimatedBuyerDensity: 7,
+    fxFit: 8,
+    travelFit: 10,
+    source: "https://www.wtm.com/london/en-gb.html",
+    sourceLabel: "WTM London official page",
+    reason: "WTM reports 46,000+ attendees and 5,500+ buyers. Tour operators, OTAs, DMCs, and accommodation businesses frequently collect and pay in multiple currencies.",
+  },
+  {
+    id: "phocuswright-conference-2026",
+    name: "The Phocuswright Conference",
+    startDate: "2026-11-17",
+    endDate: "2026-11-19",
+    city: "Fort Lauderdale",
     country: "USA",
     region: "North America",
-    vertical: "Fintech / Banking",
-    audience: 2000,
-    personas: ["Fintech", "Banking", "Embedded finance"],
-    estimatedBuyerDensity: 8,
-    fxFit: 6,
-    travelFit: 2,
-    source: "https://finovate.com/category/finovatefall-2026/",
-    sourceLabel: "Finovate event coverage",
-    reason:
-      "Strong discovery venue for fintech innovators and bank decision makers; smaller than Money20/20 but more demo-driven.",
+    vertical: "Travel Tech",
+    audience: 1200,
+    personas: ["OTAs", "Travel technology", "Hotels", "Airlines", "Travel finance", "Tour operators", "Travel executives"],
+    estimatedBuyerDensity: 9,
+    fxFit: 8,
+    travelFit: 10,
+    source: "https://www.phocuswrightconference.com/",
+    sourceLabel: "Phocuswright official page",
+    reason: "Concentrated travel decision-maker audience with a high share of C-level and VP-level attendees. Smaller event, but unusually relevant for Grain's travel vertical.",
   },
   {
-    id: "merchant-payments-ecosystem-2026",
-    name: "Merchant Payments Ecosystem",
-    startDate: "2026-03-17",
-    endDate: "2026-03-19",
-    city: "Berlin",
-    country: "Germany",
-    region: "Europe",
-    vertical: "Payments",
-    audience: 1500,
-    personas: ["Merchant acquiring", "PSP", "Payment orchestration"],
-    estimatedBuyerDensity: 8,
+    id: "imtm-tel-aviv-2027",
+    name: "IMTM - International Mediterranean Tourism Market",
+    startDate: "2027-02-16",
+    endDate: "2027-02-17",
+    city: "Tel Aviv",
+    country: "Israel",
+    region: "Middle East",
+    vertical: "Travel / Tourism",
+    audience: 17000,
+    personas: ["Travel wholesalers", "Tour operators", "Travel agencies", "DMCs", "Hotels", "Travel buyers"],
+    estimatedBuyerDensity: 7,
+    fxFit: 8,
+    travelFit: 10,
+    source: "https://www.imtm-telaviv.com/",
+    sourceLabel: "IMTM official page",
+    reason: "Israel's flagship B2B tourism marketplace. Travel wholesalers, agencies, and international tourism companies commonly manage multi-currency supplier and customer flows.",
+  },
+  {
+    id: "fintech-meetup-2027",
+    name: "Fintech Meetup",
+    startDate: "2027-02-22",
+    endDate: "2027-02-24",
+    city: "Las Vegas",
+    country: "USA",
+    region: "North America",
+    vertical: "Fintech / Financial Services",
+    audience: 5000,
+    personas: ["Fintech", "Banks", "Payment companies", "Financial institutions", "Merchants", "Fintech founders"],
+    estimatedBuyerDensity: 9,
     fxFit: 8,
     travelFit: 3,
-    source: "https://www.merchantpaymentsecosystem.com/forms/speaking-proposal",
-    sourceLabel: "MPE event page",
-    reason:
-      "Focused payments audience where cross-border settlement, orchestration, and merchant margin topics are natural openings.",
+    source: "https://fintechmeetup.com/",
+    sourceLabel: "Fintech Meetup official page",
+    reason: "Curated double-opt-in meeting format with banks, merchants, fintechs, and financial institutions. Useful for targeted meetings rather than booth-only scans.",
   },
   {
-    id: "seamless-me-2026",
-    name: "Seamless Middle East",
-    startDate: "2026-09-22",
-    endDate: "2026-09-24",
-    city: "Dubai",
-    country: "UAE",
-    region: "Middle East",
-    vertical: "Fintech / Commerce",
-    audience: 10000,
-    personas: ["Fintech", "Retail commerce", "Banking", "Payments"],
-    estimatedBuyerDensity: 7,
-    fxFit: 8,
-    travelFit: 5,
-    source: "https://terrapinn.com/exhibition/seamless-middle-east-fintech/agenda.stm",
-    sourceLabel: "Seamless agenda",
-    reason:
-      "Regional payments and commerce hub with high cross-border relevance for Gulf, Africa, and South Asia flows.",
+    id: "markethub-asia-2027",
+    name: "MarketHub Asia",
+    startDate: "2027-02-23",
+    endDate: "2027-02-26",
+    city: "Cebu",
+    country: "Philippines",
+    region: "Asia Pacific",
+    vertical: "Travel Wholesale / Travel Tech",
+    audience: null,
+    personas: ["Travel wholesalers", "Wholesale distributors", "Global travel agencies", "Hotels", "Travel technology", "DMCs"],
+    estimatedBuyerDensity: 9,
+    fxFit: 9,
+    travelFit: 10,
+    source: "https://www.hbxgroup.com/markethub",
+    sourceLabel: "HBX Group MarketHub page",
+    reason: "B2B travel event for wholesale distributors, global travel agencies, hoteliers, and travel trade decision-makers with frequent cross-currency settlement needs.",
   },
   {
-    id: "money2020-me-2026",
-    name: "Money20/20 Middle East",
-    startDate: "2026-09-14",
-    endDate: "2026-09-16",
-    city: "Riyadh",
-    country: "Saudi Arabia",
-    region: "Middle East",
-    vertical: "Fintech / Payments",
-    audience: 38500,
-    personas: ["Fintech", "Banking", "Payments", "Investors"],
-    estimatedBuyerDensity: 8,
-    fxFit: 8,
-    travelFit: 4,
-    source: "https://en.wikipedia.org/wiki/Money20/20_Middle_East",
-    sourceLabel: "Money20/20 Middle East summary",
-    reason:
-      "Large regional ecosystem event; useful when paired with Dubai to create a Middle East payments trip cluster.",
-  },
-  {
-    id: "itb-berlin-2026",
-    name: "ITB Berlin",
-    startDate: "2026-03-03",
-    endDate: "2026-03-05",
+    id: "mpe-2027",
+    name: "Merchant Payments Ecosystem (MPE)",
+    startDate: "2027-03-09",
+    endDate: "2027-03-11",
     city: "Berlin",
     country: "Germany",
     region: "Europe",
-    vertical: "Travel",
-    audience: 100000,
-    personas: ["Travel wholesalers", "OTAs", "Business travel", "Travel tech"],
+    vertical: "Payments / Merchant Payments",
+    audience: 1600,
+    personas: ["PSP", "Acquirer", "Fintech", "Merchant", "Payment provider", "Payment orchestration"],
+    estimatedBuyerDensity: 10,
+    fxFit: 9,
+    travelFit: 3,
+    source: "https://www.merchantpaymentsecosystem.com/",
+    sourceLabel: "MPE official page",
+    reason: "Very concentrated payments audience. Particularly attractive for Grain's PSP, acquirer, payment orchestration, and cross-border payments ICP.",
+  },
+  {
+    id: "itb-berlin-2027",
+    name: "ITB Berlin",
+    startDate: "2027-03-16",
+    endDate: "2027-03-18",
+    city: "Berlin",
+    country: "Germany",
+    region: "Europe",
+    vertical: "Travel / Tourism",
+    audience: 97000,
+    personas: ["Travel wholesalers", "Tour operators", "OTAs", "Hotels", "Travel technology", "DMCs", "Travel buyers"],
     estimatedBuyerDensity: 6,
-    fxFit: 7,
+    fxFit: 8,
     travelFit: 10,
-    source: "https://www.itb.com/de/presse/pressemitteilungen/news_28609.html",
-    sourceLabel: "ITB Berlin press release",
-    reason:
-      "Massive B2B travel marketplace; especially valuable for travel wholesalers and platforms with multi-currency exposure.",
+    source: "https://www.itb.com/en",
+    sourceLabel: "ITB Berlin official page",
+    reason: "Massive B2B travel marketplace. International tour operators, accommodation providers, and travel platforms can have significant multi-currency receivables and supplier payments.",
   },
   {
-    id: "business-travel-show-europe-2026",
-    name: "Business Travel Show Europe",
-    startDate: "2026-06-24",
-    endDate: "2026-06-25",
-    city: "London",
-    country: "UK",
-    region: "Europe",
-    vertical: "Travel / SaaS",
-    audience: 2400,
-    personas: ["Business travel", "TMC", "Corporate travel buyers"],
-    estimatedBuyerDensity: 6,
-    fxFit: 6,
-    travelFit: 9,
-    source: "https://www.businesstravelshoweurope.com/exhibit/attends",
-    sourceLabel: "Business Travel Show audience page",
-    reason:
-      "Good travel-finance crossover, particularly for companies managing supplier payments and FX leakage.",
-  },
-  {
-    id: "act-annual-2026",
-    name: "ACT Annual Conference",
-    startDate: "2026-05-12",
-    endDate: "2026-05-13",
-    city: "Liverpool",
-    country: "UK",
-    region: "Europe",
-    vertical: "Treasury",
-    audience: 1200,
-    personas: ["Corporate treasury", "CFO office", "Risk management"],
-    estimatedBuyerDensity: 7,
+    id: "eurofinance-west-coast-2027",
+    name: "EuroFinance Treasury & Cash Management Summit San Francisco",
+    startDate: "2027-03-16",
+    endDate: "2027-03-17",
+    city: "San Francisco",
+    country: "USA",
+    region: "North America",
+    vertical: "Treasury / FX",
+    audience: null,
+    personas: ["Corporate treasurers", "CFO / Finance", "FX risk managers", "Cash management", "Scale-ups", "Multinational companies"],
+    estimatedBuyerDensity: 10,
     fxFit: 10,
     travelFit: 1,
-    source: "https://www.treasurers.org/node/434421",
-    sourceLabel: "ACT conference page",
-    reason:
-      "Direct access to treasury practitioners who already own currency risk policy and hedging decisions.",
+    source: "https://www.eurofinance.com/treasury-cash-management-summit-west-coast/",
+    sourceLabel: "EuroFinance West Coast official page",
+    reason: "Extremely direct Grain fit for corporate treasurers managing cross-border cash flow, real-time payments, liquidity, and FX risk.",
   },
   {
-    id: "payments-leaders-usa-2026",
-    name: "Payments Leaders' Summit USA",
-    startDate: "2026-06-24",
-    endDate: "2026-06-25",
-    city: "Nashville",
+    id: "international-payments-conference-2027",
+    name: "International Payments Conference (IPC)",
+    startDate: "2027-04-05",
+    endDate: "2027-04-07",
+    city: "Washington, D.C.",
+    country: "USA",
+    region: "North America",
+    vertical: "Payments / Fintech",
+    audience: null,
+    personas: ["Payment companies", "Fintech", "Payment executives", "Financial institutions", "Payments compliance", "Payment technology"],
+    estimatedBuyerDensity: 8,
+    fxFit: 8,
+    travelFit: 1,
+    source: "https://www.ipa.org/ipc.html",
+    sourceLabel: "Innovative Payments Association IPC page",
+    reason: "Specialized payments gathering focused on payment innovation, regulation, and companies building payment products.",
+  },
+  {
+    id: "smarter-faster-payments-2027",
+    name: "Smarter Faster Payments 2027",
+    startDate: "2027-04-11",
+    endDate: "2027-04-14",
+    city: "Washington, D.C.",
     country: "USA",
     region: "North America",
     vertical: "Payments",
-    audience: 500,
-    personas: ["Senior payment leaders", "Budget holders", "PSP"],
-    estimatedBuyerDensity: 9,
+    audience: null,
+    personas: ["Payment companies", "Banks", "Fintech", "Payment strategists", "Finance teams", "Payment technology"],
+    estimatedBuyerDensity: 8,
     fxFit: 7,
-    travelFit: 2,
-    source: "https://www.payments-leaderssummit.com/attend",
-    sourceLabel: "Payments Leaders' Summit official site",
-    reason:
-      "Smaller curated summit with senior payment leaders; likely fewer scans but better meeting quality.",
+    travelFit: 1,
+    source: "https://payments.nacha.org/",
+    sourceLabel: "Nacha Smarter Faster Payments page",
+    reason: "Payments-industry conference bringing together payments experts, influencers, and fintech solution providers.",
   },
   {
-    id: "saastr-annual-2026",
-    name: "SaaStr Annual",
-    startDate: "2026-05-12",
-    endDate: "2026-05-14",
-    city: "San Francisco Bay Area",
+    id: "transact-2027",
+    name: "TRANSACT 2027",
+    startDate: "2027-04-19",
+    endDate: "2027-04-21",
+    city: "Las Vegas",
     country: "USA",
     region: "North America",
-    vertical: "SaaS",
+    vertical: "Payments / Merchant Acquiring",
+    audience: null,
+    personas: ["PSP", "Payment processors", "Acquirers", "Fintech", "Platforms", "Merchants", "Payment executives"],
+    estimatedBuyerDensity: 9,
+    fxFit: 9,
+    travelFit: 2,
+    source: "https://etatransact.com/register/",
+    sourceLabel: "TRANSACT official page",
+    reason: "Strong payments prospecting opportunity bringing together issuers, processors, fintech founders, platforms, and merchants.",
+  },
+  {
+    id: "markethub-europe-2027",
+    name: "MarketHub Europe",
+    startDate: "2027-04-20",
+    endDate: "2027-04-23",
+    city: "Rhodes",
+    country: "Greece",
+    region: "Europe",
+    vertical: "Travel Wholesale / Travel Tech",
+    audience: null,
+    personas: ["Travel wholesalers", "Wholesale distributors", "Global travel agencies", "Hotels", "Travel technology", "Tourism decision-makers"],
+    estimatedBuyerDensity: 10,
+    fxFit: 10,
+    travelFit: 10,
+    source: "https://www.hbxgroup.com/markethub",
+    sourceLabel: "HBX Group MarketHub page",
+    reason: "Highly targeted B2B travel distribution event with businesses that often have meaningful cross-border currency exposure.",
+  },
+  {
+    id: "pay360-2027",
+    name: "PAY360",
+    startDate: "2027-04-21",
+    endDate: "2027-04-22",
+    city: "London",
+    country: "United Kingdom",
+    region: "Europe",
+    vertical: "Payments",
+    audience: 7000,
+    personas: ["PSP", "Payments executives", "Banks", "Fintech", "Payment infrastructure", "Merchants"],
+    estimatedBuyerDensity: 9,
+    fxFit: 9,
+    travelFit: 2,
+    source: "https://pay360event.com/",
+    sourceLabel: "PAY360 official page",
+    reason: "Dedicated payments event with a high concentration of senior payments professionals, fintechs, banks, payment infrastructure teams, and decision-makers.",
+  },
+  {
+    id: "money2020-asia-2027",
+    name: "Money20/20 Asia",
+    startDate: "2027-04-27",
+    endDate: "2027-04-29",
+    city: "Bangkok",
+    country: "Thailand",
+    region: "Asia Pacific",
+    vertical: "Fintech / Payments",
+    audience: 4000,
+    personas: ["PSP", "Fintech", "Banking", "Cross-border payments", "Payment leaders", "Financial institutions"],
+    estimatedBuyerDensity: 9,
+    fxFit: 9,
+    travelFit: 3,
+    source: "https://www.money2020.com/",
+    sourceLabel: "Money20/20 official page",
+    reason: "Asia-Pacific edition of Money20/20. The region contains significant cross-border commerce, payment, and currency flows.",
+  },
+  {
+    id: "payments-canada-summit-2027",
+    name: "Payments Canada SUMMIT",
+    startDate: "2027-05-04",
+    endDate: "2027-05-06",
+    city: "Toronto",
+    country: "Canada",
+    region: "North America",
+    vertical: "Payments / Financial Infrastructure",
+    audience: 2000,
+    personas: ["Payment companies", "Banks", "Fintech", "Payment infrastructure", "Payment executives", "Financial institutions"],
+    estimatedBuyerDensity: 8,
+    fxFit: 8,
+    travelFit: 1,
+    source: "https://www.thesummit.ca/",
+    sourceLabel: "Payments Canada SUMMIT official page",
+    reason: "Strong concentration of payments infrastructure, financial institutions, and fintech decision-makers.",
+  },
+  {
+    id: "saastr-ai-annual-2027",
+    name: "SaaStr AI Annual",
+    startDate: "2027-05-11",
+    endDate: "2027-05-12",
+    city: "San Mateo",
+    country: "USA",
+    region: "North America",
+    vertical: "SaaS / B2B Technology",
     audience: 10000,
-    personas: ["SaaS finance", "RevOps", "Founders"],
-    estimatedBuyerDensity: 5,
-    fxFit: 5,
+    personas: ["SaaS founders", "CFO / Finance", "CEOs", "B2B executives", "Marketplace leaders", "Scale-ups"],
+    estimatedBuyerDensity: 6,
+    fxFit: 6,
     travelFit: 1,
     source: "https://www.saastrannual.com/",
-    sourceLabel: "SaaStr official site",
-    reason:
-      "Useful secondary room for SaaS companies with global revenue, but less concentrated around payments and FX ownership.",
+    sourceLabel: "SaaStr official page",
+    reason: "Useful for fast-growing SaaS and marketplace companies expanding internationally and developing meaningful FX exposure, but less concentrated than payments or treasury events.",
   },
   {
-    id: "travel-tech-show-2026",
-    name: "TravelTech Show",
-    startDate: "2026-06-24",
-    endDate: "2026-06-25",
+    id: "phocuswright-europe-2027",
+    name: "Phocuswright Europe",
+    startDate: "2027-05-24",
+    endDate: "2027-05-26",
     city: "London",
-    country: "UK",
+    country: "United Kingdom",
     region: "Europe",
     vertical: "Travel Tech",
-    audience: 4500,
-    personas: ["Travel tech", "OTAs", "Travel wholesalers"],
-    estimatedBuyerDensity: 6,
-    fxFit: 7,
+    audience: null,
+    personas: ["OTAs", "Travel technology", "Travel platforms", "Hotels", "Travel executives", "Travel investors", "Tour operators"],
+    estimatedBuyerDensity: 9,
+    fxFit: 8,
     travelFit: 10,
-    source: "https://www.traveltech-show.com/",
-    sourceLabel: "TravelTech Show official site",
-    reason:
-      "Strong for Grain's travel-wholesaler wedge and naturally clusters with Business Travel Show Europe in London.",
+    source: "https://www.phocuswright.com/events",
+    sourceLabel: "Phocuswright events page",
+    reason: "Strong concentration of senior digital travel, distribution, and technology decision-makers.",
   },
   {
-    id: "tradetech-fx-europe-2026",
-    name: "TradeTech FX Europe",
-    startDate: "2026-09-15",
-    endDate: "2026-09-17",
+    id: "money2020-europe-2027",
+    name: "Money20/20 Europe",
+    startDate: "2027-06-08",
+    endDate: "2027-06-10",
+    city: "Amsterdam",
+    country: "Netherlands",
+    region: "Europe",
+    vertical: "Fintech / Payments",
+    audience: 7400,
+    personas: ["PSP", "Fintech", "Banking", "Cross-border payments", "Payment leaders", "Financial institutions"],
+    estimatedBuyerDensity: 10,
+    fxFit: 10,
+    travelFit: 3,
+    source: "https://europe.money2020.com/",
+    sourceLabel: "Money20/20 Europe official page",
+    reason: "Excellent concentration of European payments and fintech prospects with cross-border currency exposure.",
+  },
+  {
+    id: "traveltech-show-2027",
+    name: "TravelTech Show",
+    startDate: "2027-06-23",
+    endDate: "2027-06-24",
+    city: "London",
+    country: "United Kingdom",
+    region: "Europe",
+    vertical: "Travel Tech",
+    audience: 700,
+    personas: ["Travel technology buyers", "OTAs", "Tour operators", "Travel platforms", "Payments", "Travel finance"],
+    estimatedBuyerDensity: 9,
+    fxFit: 8,
+    travelFit: 10,
+    source: "https://traveltech-show.com/",
+    sourceLabel: "TravelTech Show official page",
+    reason: "Smaller but highly targeted travel technology event with potentially high buyer density for Grain.",
+  },
+  {
+    id: "sibos-2027",
+    name: "Sibos",
+    startDate: "2027-09-20",
+    endDate: "2027-09-23",
+    city: "Singapore",
+    country: "Singapore",
+    region: "Asia Pacific",
+    vertical: "Banking / Payments / Financial Infrastructure",
+    audience: 12500,
+    personas: ["Banks", "Payments", "Transaction banking", "Fintech", "Treasury", "Cross-border payments", "FX"],
+    estimatedBuyerDensity: 9,
+    fxFit: 10,
+    travelFit: 2,
+    source: "https://www.sibos.com/about/future-sibos",
+    sourceLabel: "Sibos future events page",
+    reason: "Highly concentrated gathering of banks, transaction banking teams, payment infrastructure providers, and fintechs. Strong cross-border payments and FX relevance.",
+  },
+  {
+    id: "iftm-paris-2027",
+    name: "IFTM - International & French Travel Market",
+    startDate: "2027-10-05",
+    endDate: "2027-10-07",
+    city: "Paris",
+    country: "France",
+    region: "Europe",
+    vertical: "Travel / Tourism",
+    audience: 34638,
+    personas: ["Travel agencies", "Tour operators", "Travel wholesalers", "Travel managers", "Travel technology", "MICE buyers", "Travel purchasing managers"],
+    estimatedBuyerDensity: 7,
+    fxFit: 8,
+    travelFit: 10,
+    source: "https://www.iftm.fr/en-gb.html",
+    sourceLabel: "IFTM official page",
+    reason: "Large B2B travel trade show with a significant travel-agency audience and many businesses exposed to international supplier and customer currencies.",
+  },
+  {
+    id: "eurofinance-international-2027",
+    name: "EuroFinance International Treasury Management",
+    startDate: "2027-10-06",
+    endDate: "2027-10-08",
     city: "Amsterdam",
     country: "Netherlands",
     region: "Europe",
     vertical: "Treasury / FX",
-    audience: 600,
-    personas: ["Corporate treasury", "FX risk", "Institutional finance"],
-    estimatedBuyerDensity: 8,
+    audience: 2700,
+    personas: ["Corporate treasurer", "CFO / Finance", "FX risk", "Cash management", "Banks", "Treasury technology"],
+    estimatedBuyerDensity: 10,
     fxFit: 10,
     travelFit: 1,
-    source: "https://eco-cdn.iqpc.com/eco/files/event_content/tradetech-fx-eu-2026-draft-agenda-1wglMj2NLrWciPgWNpBzBX89ZoRmVpiMw5unDbebb.pdf",
-    sourceLabel: "TradeTech FX Europe agenda",
-    reason:
-      "Direct FX-risk room with treasury and finance operators; smaller, but unusually specific to Grain's currency-risk narrative.",
+    source: "https://www.eurofinance.com/international-treasury-event/",
+    sourceLabel: "EuroFinance International Treasury page",
+    reason: "Exceptionally strong direct fit for Grain, bringing together senior treasury professionals responsible for FX risk, liquidity, cross-border payments, and treasury transformation.",
   },
 ];
 
 const sampleLeads = [
   {
     id: "lead-1",
-    conferenceId: "itb-berlin-2026",
+    conferenceId: "itb-berlin-2027",
     name: "Maya Cohen",
     company: "AtlasPay Travel",
     email: "maya.cohen@atlaspay.example",
@@ -283,11 +470,11 @@ const sampleLeads = [
     stage: "Problem confirmed",
     notes: "Large EUR and GBP supplier exposure. Wants a sharper way to protect margin without slowing bookings.",
     tags: ["FX exposure", "Travel flow"],
-    createdAt: "2026-03-04T11:30:00.000Z",
+    createdAt: "2027-03-16T11:30:00.000Z",
   },
   {
     id: "lead-2",
-    conferenceId: "money2020-me-2026",
+    conferenceId: "wtm-london-2026",
     name: "Maya K. Cohen",
     company: "AtlasPay",
     email: "maya.cohen@atlaspay.example",
@@ -296,11 +483,11 @@ const sampleLeads = [
     stage: "Asked for follow-up",
     notes: "New title. Asked for CFO-ready material and named Q4 budget review.",
     tags: ["CFO owner", "Follow up today"],
-    createdAt: "2026-09-15T09:10:00.000Z",
+    createdAt: "2026-11-03T09:10:00.000Z",
   },
   {
     id: "lead-3",
-    conferenceId: "merchant-payments-ecosystem-2026",
+    conferenceId: "mpe-2027",
     name: "Jonas Richter",
     company: "Northstar Acquiring",
     email: "jonas@northstar.example",
@@ -309,11 +496,11 @@ const sampleLeads = [
     stage: "Quick booth scan",
     notes: "Interested in partner story but no owned problem yet.",
     tags: ["Payments volume"],
-    createdAt: "2026-03-18T16:45:00.000Z",
+    createdAt: "2027-03-09T16:45:00.000Z",
   },
   {
     id: "lead-4",
-    conferenceId: "finovatefall-2026",
+    conferenceId: "pay360-2027",
     name: "Jon Richter",
     company: "Northstar Payments",
     email: "jonas@northstar.example",
@@ -322,11 +509,11 @@ const sampleLeads = [
     stage: "Quick booth scan",
     notes: "Second conversation, still researching vendors. Asked broad pricing questions.",
     tags: ["Payments volume"],
-    createdAt: "2026-09-10T14:05:00.000Z",
+    createdAt: "2027-04-21T14:05:00.000Z",
   },
 ];
 
-let leads = loadJson(storageKeys.leads, sampleLeads);
+let leads = loadJson(storageKeys.leads, []);
 let settings = loadJson(storageKeys.settings, {
   openAiKey: "",
   openAiModel: DEFAULT_MODEL,
@@ -345,7 +532,8 @@ let leadListState = {
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadInitialLeads();
   initNavigation();
   initFilters();
   initLeadControls();
@@ -369,6 +557,26 @@ function saveLeads() {
   localStorage.setItem(storageKeys.leads, JSON.stringify(leads));
 }
 
+async function loadInitialLeads() {
+  if (leads.length) {
+    leads = normalizeImportedLeads(leads);
+    saveLeads();
+    return;
+  }
+  leads = await loadSeedLeads();
+  saveLeads();
+}
+
+async function loadSeedLeads() {
+  try {
+    const response = await fetch(LEADS_DATA_URL, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Could not load ${LEADS_DATA_URL}`);
+    return normalizeImportedLeads(await response.json());
+  } catch {
+    return sampleLeads;
+  }
+}
+
 function saveSettings() {
   localStorage.setItem(storageKeys.settings, JSON.stringify(settings));
 }
@@ -379,7 +587,8 @@ function initNavigation() {
       $$(".tab").forEach((item) => item.classList.remove("active"));
       $$(".view").forEach((view) => view.classList.remove("active"));
       tab.classList.add("active");
-      $(`#${tab.dataset.view}`).classList.add("active");
+      const view = $(`#${tab.dataset.view}`);
+      view.classList.add("active");
     });
   });
 }
@@ -489,8 +698,8 @@ function initScanCapture() {
   $("#qrImageInput").addEventListener("change", (event) => handleLeadImage(event, "qr code"));
   $("#recordConversation").addEventListener("click", () => {
     setScanStatus(
-      "Conversation recorder is a demo placeholder",
-      "Next version: record audio, transcribe after the meeting, summarize pain, urgency, owner, and next step into the lead notes.",
+      "Recording is next",
+      "Future version: record the conversation, transcribe it, and add pain, urgency, owner, and next step to the lead notes.",
     );
   });
 }
@@ -527,15 +736,15 @@ async function handleLeadImage(event, scanType) {
           : demoExtractedLead(scanType);
     fillLeadForm(extracted);
     setScanStatus(
-      settings.openAiKey ? "Details extracted" : "Demo details filled",
+      settings.openAiKey ? "Fields filled from scan" : "Demo fields filled",
       settings.openAiKey
-        ? "Review the fields, add conversation notes, then save the lead."
-        : "No OpenAI key is configured, so this uses demo data to show the intended scan-to-fill flow.",
+        ? "Review the fields, add a quick conversation note, then save."
+        : "No AI key is configured, so demo data shows how scan-to-fill works.",
     );
   } catch (error) {
     setScanStatus(
-      "Extraction failed",
-      `${error.message}. Use manual entry for this lead, or try another image with a clearer badge/card.`,
+      "Scan did not read cleanly",
+      `${error.message}. Try a clearer image or type the missing fields manually.`,
     );
   } finally {
     event.target.value = "";
@@ -643,8 +852,8 @@ function setScanStatus(title, body) {
 }
 
 function initActions() {
-  $("#resetData").addEventListener("click", () => {
-    leads = sampleLeads;
+  $("#resetData").addEventListener("click", async () => {
+    leads = await loadSeedLeads();
     saveLeads();
     renderAll();
   });
@@ -652,6 +861,9 @@ function initActions() {
   $("#copyAiPrompt").addEventListener("click", copyAiPrompt);
   $("#pushHubspot").addEventListener("click", pushLead);
   $("#exportCsv").addEventListener("click", exportCsv);
+  $("#exportJson").addEventListener("click", exportJson);
+  $("#importJsonButton").addEventListener("click", () => $("#importJsonInput").click());
+  $("#importJsonInput").addEventListener("change", importJson);
 }
 
 function renderAll() {
@@ -713,7 +925,7 @@ function renderConferences() {
     template.querySelector(".date-pill").textContent = formatDateRange(conference);
     template.querySelector("h3").textContent = conference.name;
     template.querySelector(".meta").textContent =
-      `${conference.city}, ${conference.country}${SEPARATOR}${conference.vertical}${SEPARATOR}~${formatNumber(conference.audience)} attendees`;
+      `${conference.city}, ${conference.country}${SEPARATOR}${conference.vertical}${SEPARATOR}${formatAudience(conference.audience)}`;
     template.querySelector(".reason").textContent = conference.reason;
     template.querySelector(".score-bar span").style.width = `${conference.fit.score}%`;
     template.querySelector(".score-details").addEventListener("click", () => {
@@ -722,13 +934,12 @@ function renderConferences() {
     template.querySelector(".capture-here").addEventListener("click", () => {
       openView("field");
       $("#leadConference").value = conference.name;
-      $("#leadName").focus();
     });
     grid.append(template);
   });
 
   if (!filtered.length) {
-    grid.innerHTML = '<p class="insight-item">No conferences match these filters.</p>';
+    grid.innerHTML = '<p class="insight-item">No events match this filter set. Loosen the tier, region, or search term.</p>';
   }
 }
 
@@ -743,7 +954,7 @@ function openScoreDialog(conference) {
     ${scoreMetric("Travel wedge", fit.parts.travelBonus, 8)}
     ${scoreMetric("Cluster leverage", fit.parts.clusterBonus, 8)}
     <p class="score-note">${conference.reason}</p>
-    <p class="score-note">Tier A is 78+, Tier B is 62-77, and Tier C is below 62.</p>
+    <p class="score-note">Use Tier A for must-cover events, Tier B for targeted meetings, and Tier C for opportunistic coverage.</p>
   `;
   dialog.showModal();
 }
@@ -819,7 +1030,7 @@ function renderLeads() {
   feed.innerHTML = "";
 
   if (!visibleLeads.length) {
-    feed.innerHTML = '<p class="insight-item">No leads match these filters.</p>';
+    feed.innerHTML = '<p class="insight-item">No saved leads match this view. Clear filters or scan a new lead.</p>';
     return;
   }
 
@@ -841,7 +1052,7 @@ function renderLeads() {
     name.textContent = lead.name;
     company.textContent = `${lead.company}${lead.title ? `${SEPARATOR}${lead.title}` : ""}`;
     score.textContent = leadQualityScore(lead);
-    notes.textContent = lead.notes || "No notes captured yet.";
+    notes.textContent = lead.notes || "No field notes yet. Add the pain, owner, urgency, or promised next step.";
 
     identity.append(name, company);
     header.append(identity, score);
@@ -1015,7 +1226,7 @@ function renderRelationships() {
   });
 
   if (!groups.length) {
-    list.innerHTML = '<p class="insight-item">No repeat-contact patterns yet. Capture a few leads to surface relationship arcs.</p>';
+    list.innerHTML = '<p class="insight-item">No repeat contacts yet. As reps scan more leads, this view will flag warming or stalled relationships.</p>';
   }
 }
 
@@ -1060,7 +1271,7 @@ function createTag(label) {
 function scoreConference(event) {
   const personaFit = Math.min(30, event.personas.length * 5 + event.estimatedBuyerDensity * 2);
   const fxRelevance = event.fxFit * 2.5;
-  const audienceQuality = Math.min(15, Math.log10(event.audience) * 4);
+  const audienceQuality = event.audience ? Math.min(15, Math.log10(event.audience) * 4) : 8;
   const travelBonus = event.travelFit >= 8 ? 8 : event.travelFit >= 5 ? 4 : 0;
   const clusterBonus = getClusters(false).some((cluster) => cluster.events.some((item) => item.id === event.id)) ? 8 : 0;
   const score = Math.round(personaFit + fxRelevance + audienceQuality + travelBonus + clusterBonus);
@@ -1231,7 +1442,7 @@ async function copyAiPrompt() {
   const lead = getSelectedLead("#aiLeadSelect");
   if (!lead) return;
   await navigator.clipboard.writeText(buildAiPrompt(lead));
-  $("#aiOutput").textContent = "Prompt copied. Paste it into ChatGPT or another approved AI tool.";
+  $("#aiOutput").textContent = "Prompt copied. Paste it into ChatGPT or another approved AI tool to draft the follow-up.";
 }
 
 function localCoachNote(lead) {
@@ -1276,7 +1487,7 @@ async function pushLead() {
   const lead = getSelectedLead("#hubspotLeadSelect");
   if (!lead) return;
   const payload = buildHubspotPayload(lead);
-  $("#hubspotOutput").textContent = "Pushing...";
+  $("#hubspotOutput").textContent = "Sending lead...";
 
   if (settings.webhookUrl) {
     try {
@@ -1285,10 +1496,10 @@ async function pushLead() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ source: "grain-conference-intelligence", lead, hubspotPayload: payload }),
       });
-      $("#hubspotOutput").textContent = `Webhook sent with status ${response.status}.\n\n${JSON.stringify(payload, null, 2)}`;
+      $("#hubspotOutput").textContent = `Lead sent to webhook. Status ${response.status}.\n\n${JSON.stringify(payload, null, 2)}`;
       return;
     } catch (error) {
-      $("#hubspotOutput").textContent = `Webhook failed: ${error.message}\n\n${JSON.stringify(payload, null, 2)}`;
+      $("#hubspotOutput").textContent = `Webhook failed: ${error.message}\n\nPayload is still ready to copy:\n${JSON.stringify(payload, null, 2)}`;
       return;
     }
   }
@@ -1304,17 +1515,17 @@ async function pushLead() {
         body: JSON.stringify(payload),
       });
       const body = await response.text();
-      $("#hubspotOutput").textContent = `HubSpot returned ${response.status}.\n\n${body}`;
+      $("#hubspotOutput").textContent = `HubSpot response ${response.status}.\n\n${body}`;
       return;
     } catch (error) {
       $("#hubspotOutput").textContent =
-        `Direct HubSpot call failed: ${error.message}. Use the webhook option if the static host blocks browser-to-HubSpot requests.\n\n${JSON.stringify(payload, null, 2)}`;
+        `Direct HubSpot send failed: ${error.message}. Use the webhook option if the static host blocks browser-to-HubSpot requests.\n\n${JSON.stringify(payload, null, 2)}`;
       return;
     }
   }
 
   $("#hubspotOutput").textContent =
-    `No HubSpot token or webhook configured. This is the exact contact payload to send through a private app, Zapier, Make, or a serverless proxy.\n\n${JSON.stringify(payload, null, 2)}`;
+    `No HubSpot token or webhook configured. This is the CRM-ready payload for a private app, Zapier, Make, or a serverless proxy.\n\n${JSON.stringify(payload, null, 2)}`;
 }
 
 function buildHubspotPayload(lead) {
@@ -1356,11 +1567,55 @@ function exportCsv() {
     ]),
   ];
   const csv = rows.map((row) => row.map((cell) => `"${String(cell || "").replaceAll('"', '""')}"`).join(",")).join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  downloadFile("grain-conference-leads.csv", csv, "text/csv;charset=utf-8");
+}
+
+function exportJson() {
+  downloadFile(
+    "grain-conference-leads.json",
+    JSON.stringify(leads, null, 2),
+    "application/json;charset=utf-8",
+  );
+}
+
+async function importJson(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  try {
+    leads = normalizeImportedLeads(JSON.parse(await file.text()));
+    saveLeads();
+    renderAll();
+  } catch (error) {
+    alert(`Could not load leads JSON: ${error.message}`);
+  } finally {
+    event.target.value = "";
+  }
+}
+
+function normalizeImportedLeads(data) {
+  if (!Array.isArray(data)) throw new Error("Expected an array of leads");
+  return data.map((lead) => ({
+    id: lead.id || crypto.randomUUID(),
+    conferenceId: getConference(lead.conferenceId)?.id || conferences[0].id,
+    name: String(lead.name || "").trim() || "Unknown lead",
+    company: String(lead.company || "").trim() || "Unknown company",
+    email: String(lead.email || "").trim(),
+    title: String(lead.title || "").trim(),
+    signal: leadSignals.includes(lead.signal) ? lead.signal : leadSignals[0],
+    stage: leadStages.includes(lead.stage) ? lead.stage : leadStages[0],
+    notes: String(lead.notes || "").trim(),
+    tags: Array.isArray(lead.tags) ? lead.tags.map(String) : [],
+    createdAt: lead.createdAt || new Date().toISOString(),
+  }));
+}
+
+function downloadFile(filename, content, type) {
+  const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "grain-conference-leads.csv";
+  link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -1400,6 +1655,10 @@ function formatDateRange(conference) {
 
 function formatNumber(number) {
   return new Intl.NumberFormat("en", { notation: number >= 10000 ? "compact" : "standard" }).format(number);
+}
+
+function formatAudience(audience) {
+  return audience ? `~${formatNumber(audience)} attendees` : "audience not public";
 }
 
 function unique(items) {
@@ -1447,3 +1706,4 @@ function levenshtein(a, b) {
   }
   return matrix[b.length][a.length];
 }
+
