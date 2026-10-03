@@ -1,89 +1,151 @@
 # 5-10 Minute Walkthrough Script
 
-## 1. Open with the salesperson workflow
+## 0:00-0:45 - Opening
 
-"This tool is built for Grain's sales team deciding where to spend conference time, then capturing and following up on leads while they are physically at the event. I kept the app deliberately lightweight: one browser-based workspace, editable data, no complex build pipeline, and API keys configured by the user."
+"Hi, this is my Grain Conference Intelligence tool. I built it for a salesperson or sales manager who needs to decide which conferences are worth covering, capture leads quickly at the event, and understand whether the same person showing up across conferences is warming up or just casually browsing.
 
-Show the first screen:
+The main idea is not to replace a CRM. It is a fast conference workflow: prioritize events, scan or enter leads, score the lead, track repeat contacts, and hand off clean data to HubSpot or CSV."
 
-- Point out Tier A count, trip clusters, relationship signals, and captured leads.
-- Filter by `Payments`, `Travel`, or `Middle East`.
-- Open a conference score detail.
+Show the app home screen.
 
-## 2. Explain scoring and prioritization
+Point out:
 
-"The scoring model is optimized for Grain's ICP, not generic event size. I score persona fit, FX relevance, audience quality, travel-wholesaler relevance, and trip-cluster leverage. Audience uses a capped/log-style contribution because a huge event is not automatically better if the buying persona is diluted."
+- `must-cover events`
+- `clusterable trips`
+- `repeat-contact signals`
+- `saved leads`
 
-Defend the tradeoff:
+## 0:45-2:00 - Live Demo From A Salesperson's Perspective
 
-- Money20/20 scores high because it concentrates payments and fintech buyers.
-- ACT scores well even with smaller attendance because treasury is directly responsible for currency risk.
-- Travel events get a bonus only when they are likely to contain wholesalers, OTAs, or travel tech companies with cross-border exposure.
-
-## 3. Show planning view
-
-"The planning view answers two questions: are we overloading certain months, and can we cluster travel? For example, Middle East fintech events cluster in September, and London travel events cluster in June. That lets a manager assign one owner and pre-book meetings instead of treating each event as a separate trip."
-
-Show:
-
-- Calendar density.
-- Trip clusters.
-- Coverage gaps.
-
-## 4. Show field capture
-
-"On the show floor, speed matters more than completeness, so the primary path is now scan-first. A rep can scan a conference badge, business card, or QR code and let the app prefill the form. Manual entry stays as the backup for blurry images, blocked camera access, or incomplete badges."
+"As a salesperson, I start by looking at which events are worth my time. I can filter conferences by vertical, region, or minimum tier, then open a score explanation instead of just trusting a black-box number."
 
 Demo:
 
-- Click scan badge, scan card, or scan QR.
-- Explain that live extraction uses the configured OpenAI key, while the demo fallback fills sample data when no key is present.
-- Select a conference if needed.
-- Use quick tags like `FX exposure` and `Follow up today`.
-- Save the lead.
-- Point out the disabled conversation recording button as a future path: record the conversation, transcribe later, and summarize the pain, owner, urgency, and next step into the lead notes.
+- Open `Pick events`.
+- Click a conference score badge.
+- Show the score popup.
 
-## 5. Explain cross-conference intelligence
+"Then I can move into planning. The planner shows which months are crowded and where events can be clustered into one trip. That matters because conference ROI is not only about event quality. It is also about travel leverage and whether one rep can cover multiple high-fit events in the same trip."
 
-"The relationship tracking is the most important non-obvious part. The app does not just count duplicate names. It matches exact email first, then fuzzy name plus company similarity, and also company domain when available. That handles cases like 'Maya Cohen' becoming 'Maya K. Cohen', a company shortening its name, or a title changing between events."
+Demo:
 
-Show relationship cards:
+- Open `Plan trips`.
+- Click a trip cluster.
 
-- Maya is a warming relationship because the conversation progressed from problem confirmed to follow-up requested, with a title change suggesting more authority.
-- Jonas is a watch signal because he has repeated low-intent conversations without a clear buying owner.
+"At the event, the rep can use the `Scan leads` view. The form starts with no conference selected, then badge/card/QR scans try to detect the conference from the image text or QR payload. A rep can scan a badge, business card, or QR code, then review the fields, add personal notes, quick tags, and save the lead."
+
+Demo:
+
+- Open `Scan leads`.
+- Show scan buttons: badge, card, QR.
+- Mention `Clear form`.
+- Use sample asset if available.
+- Save or explain saved lead flow.
+
+## 2:00-3:20 - Scoring And Prioritization Logic
+
+"There are three scoring layers: conference score, lead score, and relationship score. Each score is clickable and explains why it got that number."
+
+Conference scoring:
+
+"Conference scoring is tuned to Grain's ICP, not generic event size. I score:
+
+- persona fit
+- FX relevance
+- audience quality
+- travel-wholesaler or OTA relevance
+- trip-cluster leverage
+
+Audience quality is capped and log-scaled, so a huge generic event does not automatically beat a smaller but more concentrated treasury or payments event."
+
+Lead scoring:
+
+"Lead scoring combines conference fit, ICP signal, and conversation stage. For example, someone at a high-fit payments event who has a confirmed problem or asked for follow-up should rank above someone who only had booth curiosity."
+
+Demo:
+
+- Open `Saved leads`.
+- Click a lead score.
+
+Relationship scoring:
+
+"Relationship score looks at whether repeated conversations are actually getting warmer. It includes repeat engagement, intent progression, title movement, conference quality, and match confidence."
+
+Demo:
+
+- Open `Repeat buyers`.
+- Click relationship score.
+
+## 3:20-4:45 - Cross-Conference Contact Tracking
+
+"The relationship tracking is the most important non-obvious part of the project. I did not want to only count duplicate names, because that creates false positives.
+
+The matching order is:
+
+- exact email match
+- name similarity plus company similarity
+- name similarity plus company domain
+
+That handles common conference edge cases. For example, the same person may appear as `Maya Cohen` in one event and `Maya K. Cohen` in another. A company name may be shortened. A title may change. The app groups the likely same person, then surfaces the title movement and conversation progression instead of hiding it."
 
 Mention edge cases:
 
-- Same name at different companies should not match unless email/domain or company similarity supports it.
-- Job changes are surfaced rather than hidden.
-- The nudge is intentionally calibrated: warming contacts get a specific next step; low-intent repeat contacts get lighter nurture.
+- "Same name at different companies should not match unless company or domain evidence supports it."
+- "A job title change is useful signal, not just messy data."
+- "Repeated low-intent booth scans are flagged as `Watch`, not treated as hot leads."
+- "Exact email is strongest; fuzzy similarity is useful but lower confidence."
 
-## 6. Show AI feature
+Use examples:
 
-"I chose AI for follow-up coaching because it is a language and judgment task, not just a rules table. The AI gets the lead notes, conference context, and relationship history, then produces lead quality, relationship arc, next action, and a concise follow-up email."
+"In the demo data, Maya is warming because the relationship progressed and there is a stronger follow-up path. Jon is more of a watch signal because there are repeat conversations but not enough evidence of increasing intent."
 
-Show:
+## 4:45-6:00 - AI Tools And Where They Helped
 
-- Select a lead.
-- Generate a coach note.
-- Mention the API key is configurable and not hardcoded.
-- If no API key is set, show the local fallback and explain it keeps the demo usable.
+"I used AI in two ways: as a product-building assistant and as an optional feature inside the app.
 
-## 7. Show HubSpot path
+For building, AI helped me move faster on boilerplate, parser logic, UI copy, and edge-case brainstorming. It was especially useful for turning a large single-file prototype into a cleaner split codebase and for thinking through scoring explanations.
 
-"The HubSpot handoff supports three paths. In a real team I would use a serverless proxy or webhook so private app tokens never live in the browser. For the assignment, the app shows the exact CRM contact payload, supports a configurable webhook, and includes CSV export for low-connectivity situations."
+Where it got in the way was accuracy and overconfidence. For example, browser-to-API calls and OCR workflows have practical limitations: CORS, API quota, image quality, and bad OCR text. I had to test the behavior, add clear fallbacks, and make the UI honest about what happened.
 
-Show:
+Inside the app, the AI coach is optional. If an OpenAI API key is configured, it can generate a follow-up recommendation and email draft from lead context. If not, the app still works locally. Badge/card/QR capture uses local QR detection and Tesseract OCR in the browser, so scanning can work without paid API tokens."
 
-- Pick a lead.
-- Click push selected lead without credentials to show payload.
-- Mention configurable webhook and token fields.
-- Export CSV.
+Demo:
 
-## 8. Explain AI-assisted build process
+- Open `Coach & sync`.
+- Show AI settings.
+- Show coach note or fallback.
+- Mention no API keys are hardcoded.
 
-"I used AI to accelerate product scoping, generate the first implementation, and stress-test the evaluator criteria against the design. The useful part was compressing boilerplate and quickly exploring matching/scoring approaches. The parts that needed human judgment were the sales workflow, avoiding a generic CRUD app, deciding what to leave out, and making the AI feature fit the actual rep workflow."
+## 6:00-7:15 - HubSpot And Handoff
 
-## 9. What I would build next
+"For handoff, I built three paths because sales teams do not always have perfect connectivity or production credentials during a conference.
 
-"With another week, I would add authenticated team accounts, real HubSpot OAuth, a serverless AI/proxy layer, editable conference records in the UI, calendar assignment by rep, enrichment from conference exhibitor lists, and analytics on which events produce meetings and opportunities after the show."
+The app can:
+
+- show a CRM-ready HubSpot contact payload
+- send to a configurable webhook
+- export CSV
+
+In production, I would not put private app tokens directly in the browser. I would use a small serverless proxy or OAuth flow. But for this project, the payload and handoff model are visible and testable."
+
+Demo:
+
+- Pick a lead in `Coach & sync`.
+- Click `Send selected lead` without credentials to show payload.
+- Mention CSV export.
+
+## 7:15-8:30 - What I Would Build Next
+
+"If I had another week, I would focus on productionizing the workflow:
+
+1. Add authenticated team accounts and shared lead storage instead of local browser storage.
+2. Add a serverless proxy for OpenAI and HubSpot so tokens are never exposed client-side.
+3. Add proper HubSpot OAuth and duplicate contact handling.
+4. Make conference data editable in the UI, with an admin workflow for adding events.
+5. Improve OCR with cropping, confidence display, and better phone/name/company parsing from bounding boxes.
+6. Add calendar assignment by rep and meeting targets per conference.
+7. Track post-event outcomes: meetings booked, opportunities created, and pipeline influenced, so the scoring model can be improved with real results."
+
+## Closing
+
+"The product bet here is that conference work fails when capture, prioritization, and follow-up are disconnected. This tool keeps those steps in one lightweight workflow: decide where to go, capture the contact quickly, understand the relationship, and hand off the next action."

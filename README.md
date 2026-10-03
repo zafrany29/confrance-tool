@@ -60,9 +60,9 @@ Each event gets a 100-point ICP score:
 
 Tiers:
 
-- Tier A: 78+
-- Tier B: 62-77
-- Tier C: below 62
+- Tier A: 80+
+- Tier B: 61-79
+- Tier C: 60 and below
 
 ## AI and integrations
 

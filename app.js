@@ -876,7 +876,7 @@ function scoreConference(event) {
   const travelBonus = event.travelFit >= 8 ? 8 : event.travelFit >= 5 ? 4 : 0;
   const clusterBonus = getClusters(false).some((cluster) => cluster.events.some((item) => item.id === event.id)) ? 8 : 0;
   const score = Math.round(personaFit + fxRelevance + audienceQuality + travelBonus + clusterBonus);
-  const tier = score >= 78 ? "A" : score >= 62 ? "B" : "C";
+  const tier = score >= 80 ? "A" : score > 60 ? "B" : "C";
   const explanation =
     `Persona fit ${Math.round(personaFit)}/30, FX relevance ${Math.round(fxRelevance)}/25, ` +
     `audience quality ${Math.round(audienceQuality)}/15, travel wedge ${travelBonus}/8, cluster leverage ${clusterBonus}/8.`;
