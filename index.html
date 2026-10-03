@@ -13,7 +13,7 @@
       type="image/svg+xml"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230c2d2e'/%3E%3Cpath d='M14 42c13-2 15-20 29-20 3 0 6 1 8 3-8 1-13 6-18 13-4 5-10 9-19 10v-6Z' fill='%23a9e6c5'/%3E%3Cpath d='M16 26h32v5H16z' fill='%23f5c16c'/%3E%3C/svg%3E"
     />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=20261003-ai-save" />
   </head>
   <body>
     <header class="topbar">
@@ -119,6 +119,7 @@
                 <h2>Capture a lead in under a minute</h2>
                 <p>Scan what they hand you first. Type only what the camera cannot read.</p>
               </div>
+              <button id="clearLeadForm" class="ghost-button small" type="button">Clear form</button>
             </div>
             <section class="scan-panel" aria-label="Photo-first capture">
               <div class="scan-actions">
@@ -144,7 +145,7 @@
               <input id="qrImageInput" class="hidden-input" type="file" accept="image/*" capture="environment" />
               <div id="scanStatus" class="scan-status">
                 <strong>Start with a scan</strong>
-                <p>Use badge, card, or QR capture to prefill the lead. Demo data appears when no AI key is configured.</p>
+                <p>Use badge, card, or QR capture to prefill the lead. Local OCR is used when no AI key is available.</p>
               </div>
               <img id="scanPreview" class="scan-preview" alt="Captured badge or business card preview" hidden />
             </section>
@@ -167,6 +168,12 @@
                 Email
                 <input id="leadEmail" type="email" autocomplete="email" placeholder="maya@atlaspay.com" />
               </label>
+              <label>
+                Phone
+                <input id="leadPhone" type="tel" autocomplete="tel" placeholder="+1 202-555-0147" />
+              </label>
+            </div>
+            <div class="two-col">
               <label>
                 Title
                 <input id="leadTitle" autocomplete="organization-title" placeholder="VP Payments" />
@@ -263,23 +270,34 @@
       </section>
 
       <section id="integrations" class="view">
+        <article class="panel api-settings-panel">
+          <div>
+            <h2>AI scan and coach settings</h2>
+            <p>Save an OpenAI API key once for badge/card scanning and follow-up drafting. The key stays in this browser.</p>
+          </div>
+          <div class="settings-grid">
+            <label>
+              OpenAI API key
+              <input id="openAiKey" type="password" placeholder="sk-..." autocomplete="off" />
+            </label>
+            <label>
+              Model
+              <input id="openAiModel" value="gpt-4.1-mini" />
+            </label>
+          </div>
+          <div class="settings-actions">
+            <button id="saveOpenAiSettings" class="primary-button" type="button">Save AI settings</button>
+            <p id="openAiSettingsStatus" class="settings-status">Not saved in this session.</p>
+          </div>
+        </article>
+
         <div class="integration-layout">
           <article class="panel">
             <h2>Draft the right follow-up</h2>
             <p>
               Uses the selected lead, conference context, and relationship history to suggest priority, next step, and email copy.
-              Add an OpenAI API key to run live AI, or use the transparent local fallback for demos.
+              Uses the shared AI settings above, or the transparent local fallback when no key is saved.
             </p>
-            <div class="settings-grid">
-              <label>
-                OpenAI API key
-                <input id="openAiKey" type="password" placeholder="sk-..." autocomplete="off" />
-              </label>
-              <label>
-                Model
-                <input id="openAiModel" value="gpt-4.1-mini" />
-              </label>
-            </div>
             <label>
               Pick lead
               <select id="aiLeadSelect"></select>
@@ -383,6 +401,25 @@
       </form>
     </dialog>
 
-    <script src="app.js"></script>
+    <dialog id="relationshipScoreDialog" class="score-dialog">
+      <form method="dialog">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow">Relationship score breakdown</p>
+            <h2 id="relationshipScoreDialogTitle">Relationship score</h2>
+          </div>
+          <button class="icon-button" value="close" aria-label="Close relationship score details">x</button>
+        </div>
+        <div id="relationshipScoreDialogBody" class="score-details-body"></div>
+      </form>
+    </dialog>
+
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="scripts/app-data.js?v=20261003-cleanup"></script>
+    <script src="app.js?v=20261003-cleanup"></script>
+    <script src="scripts/app-utils.js?v=20261003-cleanup"></script>
+    <script src="scripts/app-settings.js?v=20261003-cleanup"></script>
+    <script src="scripts/app-scanner.js?v=20261003-cleanup"></script>
+    <script src="scripts/app-integrations.js?v=20261003-cleanup"></script>
   </body>
 </html>

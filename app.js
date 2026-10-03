@@ -1,682 +1,3 @@
-﻿const storageKeys = {
-  leads: "grainConferenceLeads",
-  settings: "grainConferenceSettings",
-};
-
-const DEFAULT_MODEL = "gpt-4.1-mini";
-const SEPARATOR = " - ";
-const CONFERENCES_PER_PAGE = 9;
-const CLUSTERS_PER_PAGE = 3;
-const LEADS_PER_PAGE = 4;
-
-const leadSignals = [
-  "Cross-border payments",
-  "PSP or merchant acquiring",
-  "Travel wholesaler or OTA",
-  "Corporate treasury",
-  "Marketplace or SaaS finance",
-  "Low fit / partner curiosity",
-];
-
-const leadStages = [
-  "Quick booth scan",
-  "Problem confirmed",
-  "Budget or owner identified",
-  "Asked for follow-up",
-  "Existing opportunity",
-];
-
-const signalScores = {
-  "Cross-border payments": 25,
-  "PSP or merchant acquiring": 23,
-  "Travel wholesaler or OTA": 22,
-  "Corporate treasury": 24,
-  "Marketplace or SaaS finance": 16,
-  "Low fit / partner curiosity": 6,
-};
-
-const stageScores = {
-  "Quick booth scan": 5,
-  "Problem confirmed": 16,
-  "Budget or owner identified": 25,
-  "Asked for follow-up": 22,
-  "Existing opportunity": 28,
-};
-
-const conferences = [
-  {
-    id: "money2020-usa-2026",
-    name: "Money20/20 USA",
-    startDate: "2026-10-18",
-    endDate: "2026-10-21",
-    city: "Las Vegas",
-    country: "USA",
-    region: "North America",
-    vertical: "Fintech / Payments",
-    audience: 11000,
-    personas: ["PSP", "Fintech", "Banking", "Cross-border payments", "Payment leaders", "CFO / Finance"],
-    estimatedBuyerDensity: 9,
-    fxFit: 9,
-    travelFit: 3,
-    source: "https://us.money2020.com/",
-    sourceLabel: "Money20/20 USA official page",
-    reason: "Money20/20 reports 11,000+ senior attendees from 3,400+ companies, including banks, payment companies, and fintechs. Strong room for international payments and multi-currency exposure.",
-  },
-  {
-    id: "wtm-london-2026",
-    name: "WTM London",
-    startDate: "2026-11-03",
-    endDate: "2026-11-05",
-    city: "London",
-    country: "United Kingdom",
-    region: "Europe",
-    vertical: "Travel / Tourism",
-    audience: 46000,
-    personas: ["Travel wholesalers", "Tour operators", "OTAs", "DMCs", "Travel technology", "Travel buyers"],
-    estimatedBuyerDensity: 7,
-    fxFit: 8,
-    travelFit: 10,
-    source: "https://www.wtm.com/london/en-gb.html",
-    sourceLabel: "WTM London official page",
-    reason: "WTM reports 46,000+ attendees and 5,500+ buyers. Tour operators, OTAs, DMCs, and accommodation businesses frequently collect and pay in multiple currencies.",
-  },
-  {
-    id: "phocuswright-conference-2026",
-    name: "The Phocuswright Conference",
-    startDate: "2026-11-17",
-    endDate: "2026-11-19",
-    city: "Fort Lauderdale",
-    country: "USA",
-    region: "North America",
-    vertical: "Travel Tech",
-    audience: 1200,
-    personas: ["OTAs", "Travel technology", "Hotels", "Airlines", "Travel finance", "Tour operators", "Travel executives"],
-    estimatedBuyerDensity: 9,
-    fxFit: 8,
-    travelFit: 10,
-    source: "https://www.phocuswrightconference.com/",
-    sourceLabel: "Phocuswright official page",
-    reason: "Concentrated travel decision-maker audience with a high share of C-level and VP-level attendees. Smaller event, but unusually relevant for Grain's travel vertical.",
-  },
-  {
-    id: "imtm-tel-aviv-2027",
-    name: "IMTM - International Mediterranean Tourism Market",
-    startDate: "2027-02-16",
-    endDate: "2027-02-17",
-    city: "Tel Aviv",
-    country: "Israel",
-    region: "Middle East",
-    vertical: "Travel / Tourism",
-    audience: 17000,
-    personas: ["Travel wholesalers", "Tour operators", "Travel agencies", "DMCs", "Hotels", "Travel buyers"],
-    estimatedBuyerDensity: 7,
-    fxFit: 8,
-    travelFit: 10,
-    source: "https://www.imtm-telaviv.com/",
-    sourceLabel: "IMTM official page",
-    reason: "Israel's flagship B2B tourism marketplace. Travel wholesalers, agencies, and international tourism companies commonly manage multi-currency supplier and customer flows.",
-  },
-  {
-    id: "fintech-meetup-2027",
-    name: "Fintech Meetup",
-    startDate: "2027-02-22",
-    endDate: "2027-02-24",
-    city: "Las Vegas",
-    country: "USA",
-    region: "North America",
-    vertical: "Fintech / Financial Services",
-    audience: 5000,
-    personas: ["Fintech", "Banks", "Payment companies", "Financial institutions", "Merchants", "Fintech founders"],
-    estimatedBuyerDensity: 9,
-    fxFit: 8,
-    travelFit: 3,
-    source: "https://fintechmeetup.com/",
-    sourceLabel: "Fintech Meetup official page",
-    reason: "Curated double-opt-in meeting format with banks, merchants, fintechs, and financial institutions. Useful for targeted meetings rather than booth-only scans.",
-  },
-  {
-    id: "markethub-asia-2027",
-    name: "MarketHub Asia",
-    startDate: "2027-02-23",
-    endDate: "2027-02-26",
-    city: "Cebu",
-    country: "Philippines",
-    region: "Asia Pacific",
-    vertical: "Travel Wholesale / Travel Tech",
-    audience: null,
-    personas: ["Travel wholesalers", "Wholesale distributors", "Global travel agencies", "Hotels", "Travel technology", "DMCs"],
-    estimatedBuyerDensity: 9,
-    fxFit: 9,
-    travelFit: 10,
-    source: "https://www.hbxgroup.com/markethub",
-    sourceLabel: "HBX Group MarketHub page",
-    reason: "B2B travel event for wholesale distributors, global travel agencies, hoteliers, and travel trade decision-makers with frequent cross-currency settlement needs.",
-  },
-  {
-    id: "mpe-2027",
-    name: "Merchant Payments Ecosystem (MPE)",
-    startDate: "2027-03-09",
-    endDate: "2027-03-11",
-    city: "Berlin",
-    country: "Germany",
-    region: "Europe",
-    vertical: "Payments / Merchant Payments",
-    audience: 1600,
-    personas: ["PSP", "Acquirer", "Fintech", "Merchant", "Payment provider", "Payment orchestration"],
-    estimatedBuyerDensity: 10,
-    fxFit: 9,
-    travelFit: 3,
-    source: "https://www.merchantpaymentsecosystem.com/",
-    sourceLabel: "MPE official page",
-    reason: "Very concentrated payments audience. Particularly attractive for Grain's PSP, acquirer, payment orchestration, and cross-border payments ICP.",
-  },
-  {
-    id: "itb-berlin-2027",
-    name: "ITB Berlin",
-    startDate: "2027-03-16",
-    endDate: "2027-03-18",
-    city: "Berlin",
-    country: "Germany",
-    region: "Europe",
-    vertical: "Travel / Tourism",
-    audience: 97000,
-    personas: ["Travel wholesalers", "Tour operators", "OTAs", "Hotels", "Travel technology", "DMCs", "Travel buyers"],
-    estimatedBuyerDensity: 6,
-    fxFit: 8,
-    travelFit: 10,
-    source: "https://www.itb.com/en",
-    sourceLabel: "ITB Berlin official page",
-    reason: "Massive B2B travel marketplace. International tour operators, accommodation providers, and travel platforms can have significant multi-currency receivables and supplier payments.",
-  },
-  {
-    id: "eurofinance-west-coast-2027",
-    name: "EuroFinance Treasury & Cash Management Summit San Francisco",
-    startDate: "2027-03-16",
-    endDate: "2027-03-17",
-    city: "San Francisco",
-    country: "USA",
-    region: "North America",
-    vertical: "Treasury / FX",
-    audience: null,
-    personas: ["Corporate treasurers", "CFO / Finance", "FX risk managers", "Cash management", "Scale-ups", "Multinational companies"],
-    estimatedBuyerDensity: 10,
-    fxFit: 10,
-    travelFit: 1,
-    source: "https://www.eurofinance.com/treasury-cash-management-summit-west-coast/",
-    sourceLabel: "EuroFinance West Coast official page",
-    reason: "Extremely direct Grain fit for corporate treasurers managing cross-border cash flow, real-time payments, liquidity, and FX risk.",
-  },
-  {
-    id: "international-payments-conference-2027",
-    name: "International Payments Conference (IPC)",
-    startDate: "2027-04-05",
-    endDate: "2027-04-07",
-    city: "Washington, D.C.",
-    country: "USA",
-    region: "North America",
-    vertical: "Payments / Fintech",
-    audience: null,
-    personas: ["Payment companies", "Fintech", "Payment executives", "Financial institutions", "Payments compliance", "Payment technology"],
-    estimatedBuyerDensity: 8,
-    fxFit: 8,
-    travelFit: 1,
-    source: "https://www.ipa.org/ipc.html",
-    sourceLabel: "Innovative Payments Association IPC page",
-    reason: "Specialized payments gathering focused on payment innovation, regulation, and companies building payment products.",
-  },
-  {
-    id: "smarter-faster-payments-2027",
-    name: "Smarter Faster Payments 2027",
-    startDate: "2027-04-11",
-    endDate: "2027-04-14",
-    city: "Washington, D.C.",
-    country: "USA",
-    region: "North America",
-    vertical: "Payments",
-    audience: null,
-    personas: ["Payment companies", "Banks", "Fintech", "Payment strategists", "Finance teams", "Payment technology"],
-    estimatedBuyerDensity: 8,
-    fxFit: 7,
-    travelFit: 1,
-    source: "https://payments.nacha.org/",
-    sourceLabel: "Nacha Smarter Faster Payments page",
-    reason: "Payments-industry conference bringing together payments experts, influencers, and fintech solution providers.",
-  },
-  {
-    id: "transact-2027",
-    name: "TRANSACT 2027",
-    startDate: "2027-04-19",
-    endDate: "2027-04-21",
-    city: "Las Vegas",
-    country: "USA",
-    region: "North America",
-    vertical: "Payments / Merchant Acquiring",
-    audience: null,
-    personas: ["PSP", "Payment processors", "Acquirers", "Fintech", "Platforms", "Merchants", "Payment executives"],
-    estimatedBuyerDensity: 9,
-    fxFit: 9,
-    travelFit: 2,
-    source: "https://etatransact.com/register/",
-    sourceLabel: "TRANSACT official page",
-    reason: "Strong payments prospecting opportunity bringing together issuers, processors, fintech founders, platforms, and merchants.",
-  },
-  {
-    id: "markethub-europe-2027",
-    name: "MarketHub Europe",
-    startDate: "2027-04-20",
-    endDate: "2027-04-23",
-    city: "Rhodes",
-    country: "Greece",
-    region: "Europe",
-    vertical: "Travel Wholesale / Travel Tech",
-    audience: null,
-    personas: ["Travel wholesalers", "Wholesale distributors", "Global travel agencies", "Hotels", "Travel technology", "Tourism decision-makers"],
-    estimatedBuyerDensity: 10,
-    fxFit: 10,
-    travelFit: 10,
-    source: "https://www.hbxgroup.com/markethub",
-    sourceLabel: "HBX Group MarketHub page",
-    reason: "Highly targeted B2B travel distribution event with businesses that often have meaningful cross-border currency exposure.",
-  },
-  {
-    id: "pay360-2027",
-    name: "PAY360",
-    startDate: "2027-04-21",
-    endDate: "2027-04-22",
-    city: "London",
-    country: "United Kingdom",
-    region: "Europe",
-    vertical: "Payments",
-    audience: 7000,
-    personas: ["PSP", "Payments executives", "Banks", "Fintech", "Payment infrastructure", "Merchants"],
-    estimatedBuyerDensity: 9,
-    fxFit: 9,
-    travelFit: 2,
-    source: "https://pay360event.com/",
-    sourceLabel: "PAY360 official page",
-    reason: "Dedicated payments event with a high concentration of senior payments professionals, fintechs, banks, payment infrastructure teams, and decision-makers.",
-  },
-  {
-    id: "money2020-asia-2027",
-    name: "Money20/20 Asia",
-    startDate: "2027-04-27",
-    endDate: "2027-04-29",
-    city: "Bangkok",
-    country: "Thailand",
-    region: "Asia Pacific",
-    vertical: "Fintech / Payments",
-    audience: 4000,
-    personas: ["PSP", "Fintech", "Banking", "Cross-border payments", "Payment leaders", "Financial institutions"],
-    estimatedBuyerDensity: 9,
-    fxFit: 9,
-    travelFit: 3,
-    source: "https://www.money2020.com/",
-    sourceLabel: "Money20/20 official page",
-    reason: "Asia-Pacific edition of Money20/20. The region contains significant cross-border commerce, payment, and currency flows.",
-  },
-  {
-    id: "payments-canada-summit-2027",
-    name: "Payments Canada SUMMIT",
-    startDate: "2027-05-04",
-    endDate: "2027-05-06",
-    city: "Toronto",
-    country: "Canada",
-    region: "North America",
-    vertical: "Payments / Financial Infrastructure",
-    audience: 2000,
-    personas: ["Payment companies", "Banks", "Fintech", "Payment infrastructure", "Payment executives", "Financial institutions"],
-    estimatedBuyerDensity: 8,
-    fxFit: 8,
-    travelFit: 1,
-    source: "https://www.thesummit.ca/",
-    sourceLabel: "Payments Canada SUMMIT official page",
-    reason: "Strong concentration of payments infrastructure, financial institutions, and fintech decision-makers.",
-  },
-  {
-    id: "saastr-ai-annual-2027",
-    name: "SaaStr AI Annual",
-    startDate: "2027-05-11",
-    endDate: "2027-05-12",
-    city: "San Mateo",
-    country: "USA",
-    region: "North America",
-    vertical: "SaaS / B2B Technology",
-    audience: 10000,
-    personas: ["SaaS founders", "CFO / Finance", "CEOs", "B2B executives", "Marketplace leaders", "Scale-ups"],
-    estimatedBuyerDensity: 6,
-    fxFit: 6,
-    travelFit: 1,
-    source: "https://www.saastrannual.com/",
-    sourceLabel: "SaaStr official page",
-    reason: "Useful for fast-growing SaaS and marketplace companies expanding internationally and developing meaningful FX exposure, but less concentrated than payments or treasury events.",
-  },
-  {
-    id: "phocuswright-europe-2027",
-    name: "Phocuswright Europe",
-    startDate: "2027-05-24",
-    endDate: "2027-05-26",
-    city: "London",
-    country: "United Kingdom",
-    region: "Europe",
-    vertical: "Travel Tech",
-    audience: null,
-    personas: ["OTAs", "Travel technology", "Travel platforms", "Hotels", "Travel executives", "Travel investors", "Tour operators"],
-    estimatedBuyerDensity: 9,
-    fxFit: 8,
-    travelFit: 10,
-    source: "https://www.phocuswright.com/events",
-    sourceLabel: "Phocuswright events page",
-    reason: "Strong concentration of senior digital travel, distribution, and technology decision-makers.",
-  },
-  {
-    id: "money2020-europe-2027",
-    name: "Money20/20 Europe",
-    startDate: "2027-06-08",
-    endDate: "2027-06-10",
-    city: "Amsterdam",
-    country: "Netherlands",
-    region: "Europe",
-    vertical: "Fintech / Payments",
-    audience: 7400,
-    personas: ["PSP", "Fintech", "Banking", "Cross-border payments", "Payment leaders", "Financial institutions"],
-    estimatedBuyerDensity: 10,
-    fxFit: 10,
-    travelFit: 3,
-    source: "https://europe.money2020.com/",
-    sourceLabel: "Money20/20 Europe official page",
-    reason: "Excellent concentration of European payments and fintech prospects with cross-border currency exposure.",
-  },
-  {
-    id: "traveltech-show-2027",
-    name: "TravelTech Show",
-    startDate: "2027-06-23",
-    endDate: "2027-06-24",
-    city: "London",
-    country: "United Kingdom",
-    region: "Europe",
-    vertical: "Travel Tech",
-    audience: 700,
-    personas: ["Travel technology buyers", "OTAs", "Tour operators", "Travel platforms", "Payments", "Travel finance"],
-    estimatedBuyerDensity: 9,
-    fxFit: 8,
-    travelFit: 10,
-    source: "https://traveltech-show.com/",
-    sourceLabel: "TravelTech Show official page",
-    reason: "Smaller but highly targeted travel technology event with potentially high buyer density for Grain.",
-  },
-  {
-    id: "sibos-2027",
-    name: "Sibos",
-    startDate: "2027-09-20",
-    endDate: "2027-09-23",
-    city: "Singapore",
-    country: "Singapore",
-    region: "Asia Pacific",
-    vertical: "Banking / Payments / Financial Infrastructure",
-    audience: 12500,
-    personas: ["Banks", "Payments", "Transaction banking", "Fintech", "Treasury", "Cross-border payments", "FX"],
-    estimatedBuyerDensity: 9,
-    fxFit: 10,
-    travelFit: 2,
-    source: "https://www.sibos.com/about/future-sibos",
-    sourceLabel: "Sibos future events page",
-    reason: "Highly concentrated gathering of banks, transaction banking teams, payment infrastructure providers, and fintechs. Strong cross-border payments and FX relevance.",
-  },
-  {
-    id: "iftm-paris-2027",
-    name: "IFTM - International & French Travel Market",
-    startDate: "2027-10-05",
-    endDate: "2027-10-07",
-    city: "Paris",
-    country: "France",
-    region: "Europe",
-    vertical: "Travel / Tourism",
-    audience: 34638,
-    personas: ["Travel agencies", "Tour operators", "Travel wholesalers", "Travel managers", "Travel technology", "MICE buyers", "Travel purchasing managers"],
-    estimatedBuyerDensity: 7,
-    fxFit: 8,
-    travelFit: 10,
-    source: "https://www.iftm.fr/en-gb.html",
-    sourceLabel: "IFTM official page",
-    reason: "Large B2B travel trade show with a significant travel-agency audience and many businesses exposed to international supplier and customer currencies.",
-  },
-  {
-    id: "eurofinance-international-2027",
-    name: "EuroFinance International Treasury Management",
-    startDate: "2027-10-06",
-    endDate: "2027-10-08",
-    city: "Amsterdam",
-    country: "Netherlands",
-    region: "Europe",
-    vertical: "Treasury / FX",
-    audience: 2700,
-    personas: ["Corporate treasurer", "CFO / Finance", "FX risk", "Cash management", "Banks", "Treasury technology"],
-    estimatedBuyerDensity: 10,
-    fxFit: 10,
-    travelFit: 1,
-    source: "https://www.eurofinance.com/international-treasury-event/",
-    sourceLabel: "EuroFinance International Treasury page",
-    reason: "Exceptionally strong direct fit for Grain, bringing together senior treasury professionals responsible for FX risk, liquidity, cross-border payments, and treasury transformation.",
-  },
-];
-
-const conferenceOverrides = {
-  "Money20/20 USA": {
-    source: "https://us.money2020.com/",
-    sourceLabel: "Official event page",
-    conferenceURL: "https://us.money2020.com/",
-    notes: "One of the strongest broad fintech events for Grain. Money20/20 reports 11,000+ senior attendees from 3,400+ companies, including banks, payment companies and fintechs. Strong opportunity to reach companies processing international payments and managing multi-currency exposure.",
-    travelFit: 5,
-  },
-  "WTM London": {
-    source: "https://www.wtm.com/london/en-gb/visit/prepare-to-visit.html",
-    sourceLabel: "Official event page",
-    conferenceURL: "https://www.wtm.com/london/en-gb.html",
-    notes: "WTM reports 46,000+ attendees and 5,500+ buyers. Particularly relevant to Grain because tour operators, OTAs, DMCs and accommodation businesses frequently collect and pay in multiple currencies, creating structural FX exposure.",
-  },
-  "The Phocuswright Conference": {
-    source: "https://www.phocuswright.com/events",
-    sourceLabel: "Official Phocuswright events page",
-    conferenceURL: "https://www.phocuswrightconference.com/",
-    notes: "Highly concentrated travel decision-maker audience. Approximately 65% of attendees are C-level or VP-level, making the smaller audience unusually valuable for Grain.",
-  },
-  "IMTM - International Mediterranean Tourism Market": {
-    source: "https://www.imtm-telaviv.com/",
-    sourceLabel: "Official event page",
-    conferenceURL: "https://www.imtm-telaviv.com/",
-    notes: "Israel's flagship B2B tourism marketplace. Travel wholesalers, agencies and international tourism companies commonly manage multi-currency supplier and customer flows, making this relevant to Grain.",
-  },
-  "Fintech Meetup": {
-    source: "https://fintechmeetup.com/2027-agenda?day=2027-02-22",
-    sourceLabel: "Official event agenda",
-    conferenceURL: "https://fintechmeetup.com/",
-    notes: "Strong prospecting event because its format is built around curated double-opt-in meetings. It brings together banks, merchants, fintechs and financial institutions.",
-    travelFit: 4,
-  },
-  "MarketHub Asia": {
-    source: "https://www.hbxgroup.com/markethub",
-    sourceLabel: "Official HBX Group event page",
-    conferenceURL: "https://www.hbxgroup.com/markethub",
-    notes: "B2B travel event bringing together wholesale distributors, global travel agencies, hoteliers and other travel trade decision-makers. These businesses frequently settle inventory and bookings across currencies.",
-  },
-  "Merchant Payments Ecosystem (MPE)": {
-    source: "https://www.merchantpaymentsecosystem.com/attend/",
-    sourceLabel: "Official MPE 2027 attendee page",
-    conferenceURL: "https://www.merchantpaymentsecosystem.com/",
-    notes: "Very concentrated payments audience. Particularly attractive for Grain's PSP and cross-border payments ICP.",
-    travelFit: 4,
-  },
-  "ITB Berlin": {
-    source: "https://www.itb.com/en",
-    sourceLabel: "Official event page",
-    conferenceURL: "https://www.itb.com/en",
-    notes: "Massive B2B travel marketplace. International tour operators, accommodation providers and travel platforms can have significant multi-currency receivables and supplier payments.",
-  },
-  "EuroFinance Treasury & Cash Management Summit San Francisco": {
-    source: "https://www.eurofinance.com/treasury-cash-management-summit-west-coast/",
-    sourceLabel: "Official EuroFinance event page",
-    conferenceURL: "https://www.eurofinance.com/treasury-cash-management-summit-west-coast/",
-    notes: "Extremely direct Grain fit. The event serves corporate treasurers at scale-ups and global enterprises managing cross-border cash flow, real-time payments, liquidity and FX risk.",
-    travelFit: 2,
-  },
-  "International Payments Conference (IPC)": {
-    source: "https://www.ipa.org/ipc-445214.html",
-    sourceLabel: "Official Innovative Payments Association event page",
-    conferenceURL: "https://www.ipa.org/ipc.html",
-    notes: "Specialized payments gathering focused on payment innovation, regulation and companies building payment products.",
-    travelFit: 2,
-  },
-  "Smarter Faster Payments 2027": {
-    source: "https://www.nacha.org/events/smarter-faster-payments-2027",
-    sourceLabel: "Official Nacha event page",
-    conferenceURL: "https://payments.nacha.org/",
-    notes: "Payments-industry conference bringing together payments experts, influencers and fintech solution providers.",
-    travelFit: 2,
-  },
-  "TRANSACT 2027": {
-    source: "https://etatransact.com/register/",
-    sourceLabel: "Official TRANSACT registration and event details",
-    conferenceURL: "https://transactshow.com/",
-    notes: "Strong payments prospecting opportunity bringing together issuers, processors, fintech founders, platforms and merchants.",
-    travelFit: 3,
-  },
-  "MarketHub Europe": {
-    source: "https://www.hbxgroup.com/markethub",
-    sourceLabel: "Official HBX Group event page",
-    conferenceURL: "https://www.hbxgroup.com/markethub",
-    notes: "Highly targeted B2B travel distribution event with businesses that frequently have significant cross-border currency exposure.",
-  },
-  "PAY360": {
-    source: "https://pay360event.com/",
-    sourceLabel: "Official event page",
-    conferenceURL: "https://pay360event.com/",
-    notes: "Dedicated payments event with a high concentration of senior payments professionals and decision-makers.",
-    travelFit: 3,
-  },
-  "Money20/20 Asia": {
-    source: "https://asia.money2020.com/attend",
-    sourceLabel: "Official Money20/20 event page",
-    conferenceURL: "https://asia.money2020.com/",
-    audience: 5000,
-    notes: "Asia-Pacific edition of Money20/20. Particularly interesting for Grain because the region contains significant cross-border commerce, payment and currency flows.",
-    travelFit: 5,
-  },
-  "Payments Canada SUMMIT": {
-    source: "https://www.payments.ca/connect/annual-conference",
-    sourceLabel: "Official Payments Canada event page",
-    conferenceURL: "https://www.thesummit.ca/",
-    notes: "Strong concentration of payments infrastructure, financial institutions and fintech decision-makers.",
-    travelFit: 2,
-  },
-  "SaaStr AI Annual": {
-    source: "https://saastr.ai/events/annual",
-    sourceLabel: "Official SaaStr event information",
-    conferenceURL: "https://saastrannual.com/",
-    notes: "Useful for reaching fast-growing SaaS and marketplace companies expanding internationally and developing meaningful FX exposure.",
-    travelFit: 2,
-  },
-  "Phocuswright Europe": {
-    source: "https://www.phocuswright.com/events",
-    sourceLabel: "Official Phocuswright events page",
-    conferenceURL: "https://www.phocuswrighteurope.com/",
-    notes: "Strong concentration of senior digital travel, distribution and technology decision-makers.",
-  },
-  "Money20/20 Europe": {
-    source: "https://europe.money2020.com/",
-    sourceLabel: "Official event page",
-    conferenceURL: "https://europe.money2020.com/",
-    notes: "Excellent concentration of European payments and fintech prospects with cross-border currency exposure.",
-    travelFit: 5,
-  },
-  "TravelTech Show": {
-    source: "https://traveltech-show.com/",
-    sourceLabel: "Official event page",
-    conferenceURL: "https://traveltech-show.com/",
-    notes: "Smaller but highly targeted travel technology event with potentially high buyer density for Grain.",
-  },
-  "Sibos": {
-    source: "https://www.sibos.com/about/future-sibos",
-    sourceLabel: "Official Sibos future events page",
-    conferenceURL: "https://www.sibos.com/",
-    notes: "Highly concentrated gathering of banks, transaction banking teams, payment infrastructure providers and fintechs. Strong cross-border payments and FX relevance.",
-    travelFit: 3,
-  },
-  "IFTM - International & French Travel Market": {
-    source: "https://www.iftm.fr/",
-    sourceLabel: "Official event page",
-    conferenceURL: "https://www.iftm.fr/",
-    notes: "Large B2B travel trade show with a significant travel-agency audience and many businesses potentially exposed to international supplier and customer currencies.",
-  },
-  "EuroFinance International Treasury Management": {
-    source: "https://www.eurofinance.com/international-treasury-event/",
-    sourceLabel: "Official event page",
-    conferenceURL: "https://www.eurofinance.com/international-treasury-event/",
-    notes: "Exceptionally strong direct fit for Grain, bringing together senior treasury professionals responsible for FX risk, liquidity, cross-border payments and treasury transformation.",
-    travelFit: 3,
-  },
-};
-
-conferences.forEach((conference) => {
-  const override = conferenceOverrides[conference.name];
-  if (!override) return;
-  Object.assign(conference, override, { reason: override.notes });
-});
-
-const demoLeads = [
-  {
-    id: "lead-1",
-    conferenceId: "itb-berlin-2027",
-    name: "Maya Cohen",
-    company: "AtlasPay Travel",
-    email: "maya.cohen@atlaspay.example",
-    title: "Director of Payments",
-    signal: "Travel wholesaler or OTA",
-    stage: "Problem confirmed",
-    notes: "Large EUR and GBP supplier exposure. Wants a sharper way to protect margin without slowing bookings.",
-    tags: ["FX exposure", "Travel flow"],
-    createdAt: "2027-03-16T11:30:00.000Z",
-  },
-  {
-    id: "lead-2",
-    conferenceId: "wtm-london-2026",
-    name: "Maya K. Cohen",
-    company: "AtlasPay",
-    email: "maya.cohen@atlaspay.example",
-    title: "VP Payments",
-    signal: "Cross-border payments",
-    stage: "Asked for follow-up",
-    notes: "New title. Asked for CFO-ready material and named Q4 budget review.",
-    tags: ["CFO owner", "Follow up today"],
-    createdAt: "2026-11-03T09:10:00.000Z",
-  },
-  {
-    id: "lead-3",
-    conferenceId: "mpe-2027",
-    name: "Jonas Richter",
-    company: "Northstar Acquiring",
-    email: "jonas@northstar.example",
-    title: "Partnerships Lead",
-    signal: "PSP or merchant acquiring",
-    stage: "Quick booth scan",
-    notes: "Interested in partner story but no owned problem yet.",
-    tags: ["Payments volume"],
-    createdAt: "2027-03-09T16:45:00.000Z",
-  },
-  {
-    id: "lead-4",
-    conferenceId: "pay360-2027",
-    name: "Jon Richter",
-    company: "Northstar Payments",
-    email: "jonas@northstar.example",
-    title: "Director, Strategic Partnerships",
-    signal: "PSP or merchant acquiring",
-    stage: "Quick booth scan",
-    notes: "Second conversation, still researching vendors. Asked broad pricing questions.",
-    tags: ["Payments volume"],
-    createdAt: "2027-04-21T14:05:00.000Z",
-  },
-];
-
 let leads = loadJson(storageKeys.leads, []);
 let settings = loadJson(storageKeys.settings, {
   openAiKey: "",
@@ -751,6 +72,26 @@ function loadInitialLeads() {
 
 function saveSettings() {
   localStorage.setItem(storageKeys.settings, JSON.stringify(settings));
+}
+
+function syncOpenAiSettingsFromUi() {
+  const saved = loadJson(storageKeys.settings, {});
+  const keyInput = $("#openAiKey");
+  const modelInput = $("#openAiModel");
+  const openAiKey = keyInput?.value.trim() || saved.openAiKey || "";
+  const openAiModel = modelInput?.value.trim() || saved.openAiModel || DEFAULT_MODEL;
+
+  settings = {
+    ...settings,
+    ...saved,
+    openAiKey,
+    openAiModel,
+  };
+
+  if (keyInput && keyInput.value !== settings.openAiKey) keyInput.value = settings.openAiKey;
+  if (modelInput && modelInput.value !== settings.openAiModel) modelInput.value = settings.openAiModel;
+
+  return settings;
 }
 
 function initNavigation() {
@@ -859,19 +200,25 @@ function fillSelect(select, options, keepFirstValue = null) {
 function initLeadForm() {
   fillSelect(
     $("#leadConference"),
-    conferences.map((conference) => conference.name),
+    [{ value: "", label: "Select conference" }, ...conferences.map((conference) => conference.name)],
   );
   fillSelect($("#leadSignal"), leadSignals);
   fillSelect($("#leadStage"), leadStages);
   $("#leadForm").addEventListener("submit", (event) => {
     event.preventDefault();
     const selectedConference = conferences.find((conference) => conference.name === $("#leadConference").value);
+    if (!selectedConference) {
+      $("#leadConference").focus();
+      alert("Choose a conference before saving this lead.");
+      return;
+    }
     const lead = {
       id: crypto.randomUUID(),
       conferenceId: selectedConference.id,
       name: $("#leadName").value.trim(),
       company: $("#leadCompany").value.trim(),
       email: $("#leadEmail").value.trim(),
+      phone: $("#leadPhone").value.trim(),
       title: $("#leadTitle").value.trim(),
       signal: $("#leadSignal").value,
       stage: $("#leadStage").value,
@@ -880,10 +227,8 @@ function initLeadForm() {
       createdAt: new Date().toISOString(),
     };
     leads = [lead, ...leads];
-    activeTags = [];
     saveLeads();
-    event.target.reset();
-    $$(".quick-tags button").forEach((button) => button.classList.remove("active"));
+    clearLeadForm();
     renderAll();
   });
 
@@ -897,171 +242,36 @@ function initLeadForm() {
       button.style.background = activeTags.includes(tag) ? "var(--mint)" : "";
     });
   });
+
+  $("#clearLeadForm").addEventListener("click", clearLeadForm);
 }
 
-function initScanCapture() {
-  $("#scanBadge").addEventListener("click", () => $("#badgeImageInput").click());
-  $("#scanCard").addEventListener("click", () => $("#cardImageInput").click());
-  $("#scanQr").addEventListener("click", () => $("#qrImageInput").click());
-  $("#badgeImageInput").addEventListener("change", (event) => handleLeadImage(event, "badge"));
-  $("#cardImageInput").addEventListener("change", (event) => handleLeadImage(event, "business card"));
-  $("#qrImageInput").addEventListener("change", (event) => handleLeadImage(event, "qr code"));
-  $("#recordConversation").addEventListener("click", () => {
-    setScanStatus(
-      "Recording is next",
-      "Future version: record the conversation, transcribe it, and add pain, urgency, owner, and next step to the lead notes.",
-    );
+function clearLeadForm() {
+  $("#leadForm").reset();
+  activeTags = [];
+  $$(".quick-tags button").forEach((button) => {
+    button.classList.remove("active");
+    button.style.background = "";
   });
-}
-
-function initSettings() {
-  $("#openAiKey").value = settings.openAiKey;
-  $("#openAiModel").value = settings.openAiModel;
-  $("#hubspotToken").value = settings.hubspotToken;
-  $("#webhookUrl").value = settings.webhookUrl;
-
-  ["openAiKey", "openAiModel", "hubspotToken", "webhookUrl"].forEach((id) => {
-    $(`#${id}`).addEventListener("input", (event) => {
-      settings[id] = event.target.value.trim();
-      saveSettings();
-    });
+  ["badgeImageInput", "cardImageInput", "qrImageInput"].forEach((id) => {
+    const input = $(`#${id}`);
+    if (input) input.value = "";
   });
-}
-
-async function handleLeadImage(event, scanType) {
-  const file = event.target.files?.[0];
-  if (!file) return;
-
-  const dataUrl = await readFileAsDataUrl(file);
-  $("#scanPreview").src = dataUrl;
-  $("#scanPreview").hidden = false;
-  setScanStatus("Reading image", `Trying to extract lead details from the ${scanType}.`);
-
-  try {
-    const extracted =
-      scanType === "qr code"
-        ? await extractLeadFromQrOrImage(file, dataUrl)
-        : settings.openAiKey
-          ? await extractLeadFromImage(dataUrl, scanType)
-          : demoExtractedLead(scanType);
-    fillLeadForm(extracted);
-    setScanStatus(
-      settings.openAiKey ? "Fields filled from scan" : "Demo fields filled",
-      settings.openAiKey
-        ? "Review the fields, add a quick conversation note, then save."
-        : "No AI key is configured, so demo data shows how scan-to-fill works.",
-    );
-  } catch (error) {
-    setScanStatus(
-      "Scan did not read cleanly",
-      `${error.message}. Try a clearer image or type the missing fields manually.`,
-    );
-  } finally {
-    event.target.value = "";
-  }
-}
-
-function readFileAsDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.addEventListener("load", () => resolve(reader.result));
-    reader.addEventListener("error", () => reject(new Error("Could not read the selected image")));
-    reader.readAsDataURL(file);
-  });
-}
-
-async function extractLeadFromImage(dataUrl, scanType) {
-  const response = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${settings.openAiKey}`,
-    },
-    body: JSON.stringify({
-      model: settings.openAiModel || DEFAULT_MODEL,
-      input: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "input_text",
-              text:
-                `Extract lead details from this conference ${scanType}. Return only JSON with these keys: ` +
-                "name, company, email, title, signal, notes. " +
-                `Use one signal from: ${leadSignals.join(", ")}. ` +
-                "If a field is missing, return an empty string. Keep notes short and factual.",
-            },
-            { type: "input_image", image_url: dataUrl },
-          ],
-        },
-      ],
-      max_output_tokens: 350,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`OpenAI returned ${response.status}`);
-  }
-
-  const data = await response.json();
-  const text = data.output_text || "";
-  const jsonText = text.match(/\{[\s\S]*\}/)?.[0] || text;
-  try {
-    return JSON.parse(jsonText);
-  } catch {
-    throw new Error("The extraction response was not valid JSON");
-  }
-}
-
-function demoExtractedLead(scanType) {
-  if (scanType === "badge") {
-    return {
-      name: "Daniel Park",
-      company: "NomadPay",
-      email: "daniel.park@nomadpay.example",
-      title: "Head of Cross-Border Payments",
-      signal: "Cross-border payments",
-      notes: "Captured from demo conference badge. Confirm FX exposure and payment volume before follow-up.",
-    };
-  }
-  if (scanType === "qr code") {
-    return {
-      name: "Ari Levin",
-      company: "BridgeRoute Payments",
-      email: "ari.levin@bridgeroute.example",
-      title: "VP Treasury Operations",
-      signal: "Cross-border payments",
-      notes: "Captured from demo QR code. Ask about treasury owner, settlement currencies, and hedge workflow.",
-    };
-  }
-  return {
-    name: "Elena Rossi",
-    company: "VistaBeds Wholesale",
-    email: "elena.rossi@vistabeds.example",
-    title: "Finance Director",
-    signal: "Travel wholesaler or OTA",
-    notes: "Captured from demo business card. Ask about supplier currency exposure and margin leakage.",
-  };
-}
-
-function fillLeadForm(lead) {
-  if (lead.name) $("#leadName").value = lead.name;
-  if (lead.company) $("#leadCompany").value = lead.company;
-  if (lead.email) $("#leadEmail").value = lead.email;
-  if (lead.title) $("#leadTitle").value = lead.title;
-  if (lead.signal) $("#leadSignal").value = lead.signal;
-  if (lead.notes) {
-    $("#leadNotes").value = $("#leadNotes").value
-      ? `${$("#leadNotes").value}\n${lead.notes}`
-      : lead.notes;
-  }
-}
-
-function setScanStatus(title, body) {
-  $("#scanStatus").innerHTML = `<strong>${title}</strong><p>${body}</p>`;
+  const preview = $("#scanPreview");
+  preview.removeAttribute("src");
+  preview.hidden = true;
+  setScanStatus(
+    "Start with a scan",
+    "Use badge, card, or QR capture to prefill the lead. Local OCR is used when no AI key is available.",
+  );
 }
 
 function initActions() {
+  document.addEventListener("click", (event) => {
+    if (event.target.closest("#saveOpenAiSettings")) {
+      saveOpenAiSettings();
+    }
+  });
   onClick("#runAi", generateAiCoachNote);
   onClick("#copyAiPrompt", copyAiPrompt);
   onClick("#pushHubspot", pushLead);
@@ -1409,7 +619,7 @@ function renderLeads() {
     score.type = "button";
     meta.className = "lead-meta";
     name.textContent = lead.name;
-    company.textContent = `${lead.company}${lead.title ? `${SEPARATOR}${lead.title}` : ""}`;
+    company.textContent = `${lead.company}${lead.title ? `${SEPARATOR}${lead.title}` : ""}${lead.phone ? `${SEPARATOR}${lead.phone}` : ""}`;
     score.textContent = leadQualityScore(lead);
     score.setAttribute("aria-label", `Why ${lead.name} scored ${score.textContent}`);
     score.addEventListener("click", () => openLeadScoreDialog(lead));
@@ -1490,90 +700,6 @@ function leadScoreMeaning(score) {
   return "Treat as light nurture or partner curiosity unless a clearer pain, owner, or budget signal appears.";
 }
 
-async function extractLeadFromQrOrImage(file, dataUrl) {
-  const qrValue = await decodeQrImage(file);
-  if (qrValue) {
-    return parseQrLead(qrValue);
-  }
-  return settings.openAiKey ? extractLeadFromImage(dataUrl, "qr code") : demoExtractedLead("qr code");
-}
-
-async function decodeQrImage(file) {
-  if (!("BarcodeDetector" in window)) return "";
-  const detector = new BarcodeDetector({ formats: ["qr_code"] });
-  const bitmap = await createImageBitmap(file);
-  try {
-    const codes = await detector.detect(bitmap);
-    return codes[0]?.rawValue || "";
-  } finally {
-    bitmap.close?.();
-  }
-}
-
-function parseQrLead(value) {
-  const trimmed = value.trim();
-  if (!trimmed) throw new Error("QR code was empty");
-
-  if (trimmed.startsWith("{")) {
-    return JSON.parse(trimmed);
-  }
-  if (/^BEGIN:VCARD/i.test(trimmed)) {
-    return parseVCard(trimmed);
-  }
-  if (/^MECARD:/i.test(trimmed)) {
-    return parseMeCard(trimmed);
-  }
-
-  try {
-    const url = new URL(trimmed);
-    const params = url.searchParams;
-    return {
-      name: params.get("name") || params.get("fullName") || "",
-      company: params.get("company") || params.get("org") || "",
-      email: params.get("email") || "",
-      title: params.get("title") || "",
-      signal: params.get("signal") || "Cross-border payments",
-      notes: params.get("notes") || `QR source: ${url.hostname}`,
-    };
-  } catch {
-    throw new Error("QR code did not contain a recognized lead format");
-  }
-}
-
-function parseVCard(value) {
-  const field = (name) => {
-    const line = value.split(/\r?\n/).find((item) => item.toUpperCase().startsWith(`${name}:`));
-    return line ? line.slice(line.indexOf(":") + 1).trim() : "";
-  };
-  return {
-    name: field("FN") || field("N").replaceAll(";", " ").trim(),
-    company: field("ORG"),
-    email: field("EMAIL"),
-    title: field("TITLE"),
-    signal: "Cross-border payments",
-    notes: "Captured from QR vCard.",
-  };
-}
-
-function parseMeCard(value) {
-  const body = value.replace(/^MECARD:/i, "").replace(/;$/, "");
-  const parts = Object.fromEntries(
-    body
-      .split(";")
-      .map((part) => part.split(":"))
-      .filter(([key, val]) => key && val)
-      .map(([key, ...rest]) => [key.toUpperCase(), rest.join(":")]),
-  );
-  return {
-    name: (parts.N || "").replace(",", " ").trim(),
-    company: parts.ORG || "",
-    email: parts.EMAIL || "",
-    title: parts.TITLE || "",
-    signal: "Cross-border payments",
-    notes: "Captured from QR meCard.",
-  };
-}
-
 function getVisibleLeads() {
   return leads
     .filter((lead) => {
@@ -1582,6 +708,7 @@ function getVisibleLeads() {
         lead.name,
         lead.company,
         lead.email,
+        lead.phone,
         lead.title,
         lead.signal,
         lead.stage,
@@ -1627,6 +754,7 @@ function renderRelationships() {
     const last = sorted[sorted.length - 1];
     const conferencesMet = unique(sorted.map((lead) => getConference(lead.conferenceId).name));
     const signal = relationshipSignal(sorted);
+    const relationshipScore = relationshipScoreBreakdown(group);
     const titleShift =
       normalizeTitle(first.title) !== normalizeTitle(last.title)
         ? `Title changed from ${first.title || "unknown"} to ${last.title || "unknown"}.`
@@ -1639,7 +767,12 @@ function renderRelationships() {
           <h3>${last.name}</h3>
           <p class="meta">${last.company}${SEPARATOR}${conferencesMet.length} conferences${SEPARATOR}${sorted.length} conversations</p>
         </div>
-        <span class="tag ${signal.kind === "warming" ? "signal-warm" : "signal-watch"}">${signal.label}</span>
+        <div class="relationship-actions">
+          <button class="lead-score relationship-score" type="button" aria-label="Why ${last.name} scored ${relationshipScore.total}">
+            ${relationshipScore.total}
+          </button>
+          <span class="tag ${signal.kind === "warming" ? "signal-warm" : "signal-watch"}">${signal.label}</span>
+        </div>
       </header>
       <p>${signal.summary}</p>
       <ul>
@@ -1648,12 +781,54 @@ function renderRelationships() {
         <li>Seen at ${conferencesMet.join(", ")}.</li>
       </ul>
     `;
+    article.querySelector(".relationship-score").addEventListener("click", () => openRelationshipScoreDialog(group));
     list.append(article);
   });
 
   if (!groups.length) {
     list.innerHTML = '<p class="insight-item">No repeat contacts yet. As reps scan more leads, this view will flag warming or stalled relationships.</p>';
   }
+}
+
+function openRelationshipScoreDialog(group) {
+  const sorted = [...group.leads].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  const first = sorted[0];
+  const last = sorted[sorted.length - 1];
+  const breakdown = relationshipScoreBreakdown(group);
+  const signal = relationshipSignal(sorted);
+  const conferencesMet = unique(sorted.map((lead) => getConference(lead.conferenceId).name));
+
+  $("#relationshipScoreDialogTitle").textContent = `${last.name}${SEPARATOR}${breakdown.total}/100${SEPARATOR}${relationshipScoreLabel(breakdown.total)}`;
+  $("#relationshipScoreDialogBody").innerHTML = `
+    ${scoreMetric("Repeat engagement", breakdown.touchFit, 22)}
+    ${scoreMetric("Intent progression", breakdown.intentFit, 26)}
+    ${scoreMetric("Title movement", breakdown.titleFit, 16)}
+    ${scoreMetric("Conference quality", breakdown.conferenceFit, 24)}
+    ${scoreMetric("Match confidence", breakdown.matchFit, 12)}
+    <div class="detail-list">
+      <article class="detail-row">
+        <strong>Conclusion</strong>
+        <p>${relationshipScoreMeaning(breakdown.total, signal)}</p>
+      </article>
+      <article class="detail-row">
+        <strong>Repeat engagement</strong>
+        <p>${sorted.length} conversations across ${conferencesMet.length} conference${conferencesMet.length === 1 ? "" : "s"}: ${conferencesMet.join(", ")}.</p>
+      </article>
+      <article class="detail-row">
+        <strong>Intent progression</strong>
+        <p>Started at ${first.stage}; latest stage is ${last.stage}. This measures whether the relationship is warming or just repeating low-intent chats.</p>
+      </article>
+      <article class="detail-row">
+        <strong>Title movement</strong>
+        <p>${normalizeTitle(first.title) !== normalizeTitle(last.title) ? `Title changed from ${first.title || "unknown"} to ${last.title || "unknown"}.` : "No title change detected yet."}</p>
+      </article>
+      <article class="detail-row">
+        <strong>Match confidence</strong>
+        <p>Records were grouped by ${group.matchReason}. Exact email matches are stronger than name/company similarity.</p>
+      </article>
+    </div>
+  `;
+  $("#relationshipScoreDialog").showModal();
 }
 
 function renderLeadSelectors() {
@@ -1802,337 +977,55 @@ function relationshipSignal(items) {
   };
 }
 
-async function generateAiCoachNote() {
-  const lead = getSelectedLead("#aiLeadSelect");
-  if (!lead) return;
-  const prompt = buildAiPrompt(lead);
-  $("#aiOutput").textContent = "Generating...";
+function relationshipScoreBreakdown(group) {
+  const sorted = [...group.leads].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  const first = sorted[0];
+  const last = sorted[sorted.length - 1];
+  const conferencesMet = unique(sorted.map((lead) => lead.conferenceId));
+  const highestStage = Math.max(...sorted.map((lead) => stageScores[lead.stage] || 0));
+  const latestStage = stageScores[last.stage] || 0;
+  const repeatedLowIntent = sorted.length > 1 && sorted.every((lead) => lead.stage === "Quick booth scan");
+  const titleChanged = normalizeTitle(first.title) !== normalizeTitle(last.title);
+  const averageConferenceScore =
+    sorted.reduce((sum, lead) => sum + scoreConference(getConference(lead.conferenceId)).score, 0) / sorted.length;
 
-  if (!settings.openAiKey) {
-    $("#aiOutput").textContent = localCoachNote(lead);
-    return;
-  }
+  const touchFit = Math.min(22, 8 + sorted.length * 5 + Math.max(0, conferencesMet.length - 1) * 3);
+  const intentFit = repeatedLowIntent ? 6 : Math.min(26, Math.round((highestStage + latestStage) / 2));
+  const titleFit = titleChanged ? 16 : normalizeTitle(last.title) ? 8 : 3;
+  const conferenceFit = Math.round(averageConferenceScore * 0.24);
+  const matchFit = group.matchReason.includes("email")
+    ? 12
+    : group.matchReason.includes("domain")
+      ? 10
+      : group.matchReason.includes("similarity")
+        ? 8
+        : 6;
 
-  try {
-    const response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${settings.openAiKey}`,
-      },
-      body: JSON.stringify({
-        model: settings.openAiModel || DEFAULT_MODEL,
-        input: prompt,
-        max_output_tokens: 450,
-      }),
-    });
-    if (!response.ok) {
-      throw new Error(`OpenAI returned ${response.status}`);
-    }
-    const data = await response.json();
-    $("#aiOutput").textContent = data.output_text || JSON.stringify(data, null, 2);
-  } catch (error) {
-    $("#aiOutput").textContent =
-      `${localCoachNote(lead)}\n\nLive AI call failed: ${error.message}. For a hosted static app, use a small serverless proxy if browser CORS blocks direct API calls.`;
-  }
-}
-
-function buildAiPrompt(lead) {
-  const conference = getConference(lead.conferenceId);
-  const related = getRelationshipGroups().find((group) => group.leads.some((item) => item.id === lead.id));
-  return `You are a sales coach for Grain, an FX risk management company selling to PSPs, travel wholesalers, cross-border payment companies, and finance teams with currency exposure.
-
-Lead:
-- Name: ${lead.name}
-- Company: ${lead.company}
-- Title: ${lead.title || "Unknown"}
-- Conference: ${conference.name}
-- Signal: ${lead.signal}
-- Conversation stage: ${lead.stage}
-- Tags: ${lead.tags.join(", ") || "None"}
-- Notes: ${lead.notes || "None"}
-
-Known relationship history:
-${(related?.leads || [lead])
-  .map((item) => `- ${getConference(item.conferenceId).name}: ${item.stage}; ${item.notes || "no notes"}`)
-  .join("\n")}
-
-Return:
-1. Lead quality: High, Medium, or Low with one sentence.
-2. Relationship arc: warming, stalled, or unknown with evidence.
-3. Best next action for the rep.
-4. A concise follow-up email under 120 words.`;
-}
-
-async function copyAiPrompt() {
-  const lead = getSelectedLead("#aiLeadSelect");
-  if (!lead) return;
-  await navigator.clipboard.writeText(buildAiPrompt(lead));
-  $("#aiOutput").textContent = "Prompt copied. Paste it into ChatGPT or another approved AI tool to draft the follow-up.";
-}
-
-function localCoachNote(lead) {
-  const conference = getConference(lead.conferenceId);
-  const score = leadQualityScore(lead);
-  const quality = score >= 75 ? "High" : score >= 52 ? "Medium" : "Low";
-  const group = getRelationshipGroups().find((item) => item.leads.some((groupLead) => groupLead.id === lead.id));
-  const signal = relationshipSignal(group?.leads || [lead]);
-  return `Offline coach note
-
-Lead quality: ${quality} (${score}/100)
-Why: ${lead.signal}; ${lead.stage}; ${conference.name} is Tier ${scoreConference(conference).tier} for Grain.
-
-Relationship arc: ${signal.label}
-${signal.summary}
-
-Best next action:
-${lead.stage.includes("follow") || lead.stage.includes("Budget") ? "Send a same-day follow-up with a CFO/finance-oriented CTA and ask for a 20-minute working session." : "Ask one qualifying question before booking time: who owns FX margin leakage or hedging policy today?"}
-
-Draft follow-up:
-Subject: Good speaking at ${conference.name}
-
-Hi ${lead.name.split(" ")[0]},
-
-Good speaking at ${conference.name}. Your note about ${lead.notes ? lead.notes.split(".")[0].toLowerCase() : "currency exposure"} sounded close to the kind of margin risk Grain helps payments and travel teams manage.
-
-Worth a 20-minute conversation next week to map where FX exposure is showing up and whether there is a practical hedge workflow for it?
-
-Best,
-Grain team`;
-}
-
-function leadQualityScore(lead) {
-  return leadScoreBreakdown(lead).total;
-}
-
-async function pushLead() {
-  const lead = getSelectedLead("#hubspotLeadSelect");
-  if (!lead) return;
-  const payload = buildHubspotPayload(lead);
-  $("#hubspotOutput").textContent = "Sending lead...";
-
-  if (settings.webhookUrl) {
-    try {
-      const response = await fetch(settings.webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ source: "grain-conference-intelligence", lead, hubspotPayload: payload }),
-      });
-      $("#hubspotOutput").textContent = `Lead sent to webhook. Status ${response.status}.\n\n${JSON.stringify(payload, null, 2)}`;
-      return;
-    } catch (error) {
-      $("#hubspotOutput").textContent = `Webhook failed: ${error.message}\n\nPayload is still ready to copy:\n${JSON.stringify(payload, null, 2)}`;
-      return;
-    }
-  }
-
-  if (settings.hubspotToken) {
-    try {
-      const response = await fetch("https://api.hubapi.com/crm/v3/objects/contacts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${settings.hubspotToken}`,
-        },
-        body: JSON.stringify(payload),
-      });
-      const body = await response.text();
-      $("#hubspotOutput").textContent = `HubSpot response ${response.status}.\n\n${body}`;
-      return;
-    } catch (error) {
-      $("#hubspotOutput").textContent =
-        `Direct HubSpot send failed: ${error.message}. Use the webhook option if the static host blocks browser-to-HubSpot requests.\n\n${JSON.stringify(payload, null, 2)}`;
-      return;
-    }
-  }
-
-  $("#hubspotOutput").textContent =
-    `No HubSpot token or webhook configured. This is the CRM-ready payload for a private app, Zapier, Make, or a serverless proxy.\n\n${JSON.stringify(payload, null, 2)}`;
-}
-
-function buildHubspotPayload(lead) {
-  const conference = getConference(lead.conferenceId);
-  const [firstname, ...rest] = lead.name.split(" ");
   return {
-    properties: {
-      email: lead.email,
-      firstname,
-      lastname: rest.join(" "),
-      company: lead.company,
-      jobtitle: lead.title,
-      lifecyclestage: "lead",
-      hs_lead_status: "NEW",
-      conference_name: conference.name,
-      conference_date: conference.startDate,
-      conference_icp_score: String(scoreConference(conference).score),
-      grain_icp_signal: lead.signal,
-      grain_conversation_stage: lead.stage,
-      grain_field_notes: lead.notes,
-      grain_tags: lead.tags.join("; "),
-    },
+    touchFit,
+    intentFit,
+    titleFit,
+    conferenceFit,
+    matchFit,
+    total: Math.min(100, Math.round(touchFit + intentFit + titleFit + conferenceFit + matchFit)),
   };
 }
 
-function exportCsv() {
-  const rows = [
-    ["Name", "Company", "Email", "Title", "Conference", "Signal", "Stage", "Notes", "Tags"],
-    ...leads.map((lead) => [
-      lead.name,
-      lead.company,
-      lead.email,
-      lead.title,
-      getConference(lead.conferenceId).name,
-      lead.signal,
-      lead.stage,
-      lead.notes,
-      lead.tags.join("; "),
-    ]),
-  ];
-  const csv = rows.map((row) => row.map((cell) => `"${String(cell || "").replaceAll('"', '""')}"`).join(",")).join("\n");
-  downloadFile("grain-conference-leads.csv", csv, "text/csv;charset=utf-8");
+function relationshipScoreLabel(score) {
+  if (score >= 78) return "Warm relationship";
+  if (score >= 55) return "Developing";
+  return "Watch";
 }
 
-function exportJson() {
-  downloadFile(
-    "grain-conference-leads.json",
-    JSON.stringify(leads, null, 2),
-    "application/json;charset=utf-8",
-  );
-}
-
-async function importJson(event) {
-  const file = event.target.files?.[0];
-  if (!file) return;
-
-  try {
-    leads = normalizeImportedLeads(JSON.parse(await file.text()));
-    saveLeads();
-    renderAll();
-  } catch (error) {
-    alert(`Could not load leads JSON: ${error.message}`);
-  } finally {
-    event.target.value = "";
+function relationshipScoreMeaning(score, signal) {
+  if (score >= 78) {
+    return "Prioritize a specific next step. The repeated engagement, intent, and event quality indicate a relationship worth active sales attention.";
   }
-}
-
-function normalizeImportedLeads(data) {
-  if (!Array.isArray(data)) throw new Error("Expected an array of leads");
-  return data.map((lead) => ({
-    id: lead.id || crypto.randomUUID(),
-    conferenceId: getConference(lead.conferenceId)?.id || conferences[0].id,
-    name: String(lead.name || "").trim() || "Unknown lead",
-    company: String(lead.company || "").trim() || "Unknown company",
-    email: String(lead.email || "").trim(),
-    title: String(lead.title || "").trim(),
-    signal: leadSignals.includes(lead.signal) ? lead.signal : leadSignals[0],
-    stage: leadStages.includes(lead.stage) ? lead.stage : leadStages[0],
-    notes: String(lead.notes || "").trim(),
-    tags: Array.isArray(lead.tags) ? lead.tags.map(String) : [],
-    createdAt: lead.createdAt || new Date().toISOString(),
-  }));
-}
-
-function downloadFile(filename, content, type) {
-  const blob = new Blob([content], { type });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
-function getSelectedLead(selector) {
-  const id = $(selector).value;
-  return leads.find((lead) => lead.id === id);
-}
-
-function getConference(id) {
-  return conferences.find((conference) => conference.id === id) || conferences[0];
-}
-
-function leadLabel(lead) {
-  return [lead.name, lead.company, getConference(lead.conferenceId).name].join(SEPARATOR);
-}
-
-function getRelationshipCount(lead) {
-  const group = getRelationshipGroups().find((item) => item.leads.some((groupLead) => groupLead.id === lead.id));
-  return group?.leads.length || 1;
-}
-
-function dateValue(value) {
-  return new Date(value).getTime() || 0;
-}
-
-function openView(id) {
-  $(`.tab[data-view="${id}"]`).click();
-}
-
-function formatDateRange(conference) {
-  const start = new Date(`${conference.startDate}T00:00:00`);
-  const end = new Date(`${conference.endDate}T00:00:00`);
-  const month = start.toLocaleString("en", { month: "short" });
-  return `${month} ${start.getDate()}-${end.getDate()}`;
-}
-
-function formatFullDateRange(conference) {
-  const start = new Date(`${conference.startDate}T00:00:00`);
-  const end = new Date(`${conference.endDate}T00:00:00`);
-  const startText = start.toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" });
-  const endText = end.toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" });
-  return startText === endText ? startText : `${startText} - ${endText}`;
-}
-
-function formatNumber(number) {
-  return new Intl.NumberFormat("en", { notation: number >= 10000 ? "compact" : "standard" }).format(number);
-}
-
-function formatAudience(audience) {
-  return audience ? `~${formatNumber(audience)} attendees` : "audience not public";
-}
-
-function unique(items) {
-  return [...new Set(items.filter(Boolean))];
-}
-
-function daysBetween(a, b) {
-  return (new Date(`${a}T00:00:00`) - new Date(`${b}T00:00:00`)) / 86400000;
-}
-
-function getDomain(email = "") {
-  return email.includes("@") ? email.split("@")[1].toLowerCase() : "";
-}
-
-function normalizeName(value = "") {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9 ]/g, "")
-    .replace(/\b(vp|director|head|lead|payments|payment|travel|group|inc|ltd|llc)\b/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function normalizeTitle(value = "") {
-  return value.toLowerCase().replace(/[^a-z ]/g, "").trim();
-}
-
-function similarity(a, b) {
-  if (!a || !b) return 0;
-  const longer = a.length > b.length ? a : b;
-  const shorter = a.length > b.length ? b : a;
-  return (longer.length - levenshtein(longer, shorter)) / longer.length;
-}
-
-function levenshtein(a, b) {
-  const matrix = Array.from({ length: b.length + 1 }, (_, i) => [i]);
-  for (let j = 0; j <= a.length; j += 1) matrix[0][j] = j;
-  for (let i = 1; i <= b.length; i += 1) {
-    for (let j = 1; j <= a.length; j += 1) {
-      matrix[i][j] =
-        b[i - 1] === a[j - 1]
-          ? matrix[i - 1][j - 1]
-          : Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
-    }
+  if (score >= 55) {
+    return "Keep the relationship moving, but qualify urgency and ownership before committing heavy follow-up time.";
   }
-  return matrix[b.length][a.length];
+  return signal.kind === "watch"
+    ? "Repeated contact is visible, but intent has not increased. Keep useful context flowing and wait for a clearer business owner or pain."
+    : "There is enough signal to monitor, but not enough evidence yet for a high-priority relationship push.";
 }
+
